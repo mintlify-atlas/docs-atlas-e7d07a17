@@ -1,0 +1,116 @@
+{
+  "projectType": "saas",
+  "projectName": "Snipe-IT",
+  "projectDescription": "A free open source IT asset/license management system built on Laravel",
+  "theme": "linden",
+  "primaryColor": "#8d2e8b",
+  "lightColor": "#1c1c1c",
+  "darkColor": "#f3cfc8",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/assets",
+              "features/licenses",
+              "features/accessories",
+              "features/consumables",
+              "features/components",
+              "features/users",
+              "features/locations",
+              "features/maintenance"
+            ]
+          },
+          {
+            "group": "Administration",
+            "pages": [
+              "admin/configuration",
+              "admin/custom-fields",
+              "admin/categories",
+              "admin/companies",
+              "admin/backups",
+              "admin/security"
+            ]
+          },
+          {
+            "group": "Integration",
+            "pages": [
+              "integration/api-overview",
+              "integration/ldap",
+              "integration/saml",
+              "integration/webhooks"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "api/authentication",
+              "api/rate-limits"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/assets",
+              "api/licenses",
+              "api/accessories",
+              "api/consumables",
+              "api/components",
+              "api/users",
+              "api/locations",
+              "api/manufacturers",
+              "api/suppliers",
+              "api/categories",
+              "api/status-labels"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Asset tracking and management",
+    "Software license management",
+    "Check-in/check-out workflows",
+    "Depreciation tracking",
+    "Maintenance scheduling",
+    "Custom fields and reporting",
+    "Multi-company support",
+    "RESTful API",
+    "LDAP/SAML authentication",
+    "QR code generation"
+  ],
+  "publicApiSurface": [
+    "GET /api/v1/hardware - List all assets",
+    "POST /api/v1/hardware - Create asset",
+    "GET /api/v1/licenses - List all licenses",
+    "POST /api/v1/licenses - Create license",
+    "GET /api/v1/accessories - List accessories",
+    "GET /api/v1/consumables - List consumables",
+    "GET /api/v1/components - List components",
+    "GET /api/v1/users - List users",
+    "GET /api/v1/locations - List locations",
+    "POST /api/v1/hardware/{id}/checkout - Check out asset",
+    "POST /api/v1/hardware/{id}/checkin - Check in asset",
+    "GET /api/v1/manufacturers - List manufacturers",
+    "GET /api/v1/suppliers - List suppliers",
+    "GET /api/v1/categories - List categories",
+    "GET /api/v1/statuslabels - List status labels"
+  ]
+}

@@ -1,0 +1,236 @@
+---
+title: 'Status Labels'
+description: 'Manage asset status labels via the API'
+---
+
+The Status Labels API allows you to manage the status labels that define whether assets are deployable, pending, archived, or undeployable.
+
+## List Status Labels
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/statuslabels" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter results
+</ParamField>
+
+<ParamField query="sort" type="string" default="created_at">
+  Column to sort by. Allowed values: `id`, `name`, `assets_count`, `color`, `default_label`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="status_type" type="string">
+  Filter by status type: `deployable`, `pending`, `archived`, `undeployable`
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total number of status labels
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  Array of status label objects
+  <Expandable title="Status Label Object">
+    <ResponseField name="id" type="integer">
+      Status label ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Status label name
+    </ResponseField>
+    <ResponseField name="type" type="string">
+      Status type: `deployable`, `pending`, `archived`, or `undeployable`
+    </ResponseField>
+    <ResponseField name="color" type="string">
+      Hex color code for the label
+    </ResponseField>
+    <ResponseField name="show_in_nav" type="boolean">
+      Whether to show in navigation sidebar
+    </ResponseField>
+    <ResponseField name="default_label" type="boolean">
+      Whether this is the default status label
+    </ResponseField>
+    <ResponseField name="assets_count" type="integer">
+      Number of assets with this status
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      Status label notes
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Get Status Label by ID
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/statuslabels/{statuslabel_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="statuslabel_id" type="integer" required>
+  The status label ID
+</ParamField>
+
+## Create Status Label
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/statuslabels" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Ready to Deploy",
+    "type": "deployable",
+    "color": "#00FF00",
+    "show_in_nav": true
+  }'
+```
+</CodeGroup>
+
+<ParamField body="name" type="string" required>
+  Status label name
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Status type. Allowed values: `deployable`, `pending`, `archived`, `undeployable`
+</ParamField>
+
+<ParamField body="color" type="string">
+  Hex color code (e.g., #FF5733)
+</ParamField>
+
+<ParamField body="show_in_nav" type="boolean" default="false">
+  Whether to show this status in the navigation sidebar
+</ParamField>
+
+<ParamField body="default_label" type="boolean" default="false">
+  Whether this should be the default status label for new assets
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Status label notes
+</ParamField>
+
+<Note>
+**Status Types:**
+- **deployable**: Assets that can be checked out to users
+- **pending**: Assets awaiting some action (repairs, configuration, etc.)
+- **archived**: Assets that are no longer in active use
+- **undeployable**: Assets that cannot be deployed (broken, lost, etc.)
+</Note>
+
+## Update Status Label
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://your-domain.com/api/v1/statuslabels/{statuslabel_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Status Name",
+    "color": "#0000FF"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="statuslabel_id" type="integer" required>
+  The status label ID
+</ParamField>
+
+## Delete Status Label
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://your-domain.com/api/v1/statuslabels/{statuslabel_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="statuslabel_id" type="integer" required>
+  The status label ID
+</ParamField>
+
+<Note>A status label cannot be deleted if it has any assets assigned to it. You must first change the status of all associated assets.</Note>
+
+## Check if Deployable
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/statuslabels/{statuslabel_id}/deployable" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="statuslabel_id" type="integer" required>
+  The status label ID
+</ParamField>
+
+Returns whether the specified status label is deployable.
+
+## Get Assets by Status
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/statuslabels/{statuslabel_id}/assetlist" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="statuslabel_id" type="integer" required>
+  The status label ID
+</ParamField>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+Returns all assets with the specified status label.
+
+## Get Asset Count by Status Name
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/statuslabels/assets/name" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+Returns a count of assets grouped by status label name (useful for charts and dashboards).
+
+## Get Asset Count by Status Type
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/statuslabels/assets/type" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+Returns a count of assets grouped by meta status type (deployable, pending, archived, undeployable).

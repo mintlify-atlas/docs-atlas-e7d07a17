@@ -1,0 +1,441 @@
+---
+title: "SAML Single Sign-On"
+description: "Configure SAML SSO with identity providers like Azure AD, Okta, and Google Workspace"
+icon: "key"
+---
+
+Snipe-IT supports SAML 2.0 for single sign-on (SSO) authentication. This allows users to log in using their existing corporate credentials from identity providers like Azure AD, Okta, Google Workspace, OneLogin, and more.
+
+## Overview
+
+SAML SSO provides:
+- Single sign-on experience for users
+- Centralized user authentication
+- Reduced password fatigue
+- Enhanced security through identity provider features (MFA, conditional access)
+- Automatic user provisioning from identity provider
+
+<Info>
+SAML support is built into Snipe-IT and uses the `onelogin/php-saml` library.
+</Info>
+
+## Prerequisites
+
+<Check>
+Before configuring SAML, ensure you have:
+- Access to your identity provider's admin console
+- Admin access to your Snipe-IT instance
+- Understanding of basic SAML concepts (SP, IdP, metadata)
+- HTTPS enabled on your Snipe-IT instance (required for production)
+</Check>
+
+## Configuration Overview
+
+SAML configuration involves two main steps:
+1. Configure Snipe-IT as a Service Provider (SP)
+2. Register Snipe-IT with your Identity Provider (IdP)
+
+## Step 1: Enable SAML in Snipe-IT
+
+### Web Interface Configuration
+
+1. Navigate to **Admin** > **Settings** > **SAML**
+2. Enable SAML authentication
+3. Configure the following settings:
+
+<Steps>
+<Step title="Identity Provider Metadata">
+Provide your IdP metadata (either XML content or metadata URL):
+
+- **IdP Metadata**: Paste the XML metadata from your identity provider, or
+- **IdP Metadata URL**: Provide the URL to your IdP's metadata endpoint
+
+This metadata includes the IdP's SSO URL, certificate, and entity ID.
+</Step>
+
+<Step title="Attribute Mapping">
+Map SAML attributes to Snipe-IT user fields:
+
+- **Username Attribute**: The SAML attribute containing the username (e.g., `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name`)
+
+Common attribute mappings will be covered in the IdP-specific sections below.
+</Step>
+
+<Step title="Service Provider Certificate" icon="certificate">
+Optionally generate or upload SP certificates for signing requests:
+
+- Click **Generate Certificates** to create new SP certificates, or
+- Upload existing certificates if you have them
+
+Certificates are used to sign logout requests and enable encrypted assertions.
+</Step>
+</Steps>
+
+### Environment Variables
+
+You can also configure SAML via environment variables:
+
+```bash .env
+# Enable SAML
+REQUIRE_SAML=false  # Set to true to force SAML login only
+SAML_KEY_SIZE=2048  # Certificate key size
+```
+
+<Warning>
+Setting `REQUIRE_SAML=true` will disable local authentication. Ensure SAML is working correctly before enabling this.
+</Warning>
+
+## Step 2: Get Snipe-IT Metadata
+
+Your identity provider will need Snipe-IT's SAML metadata to complete the configuration.
+
+### Download SP Metadata
+
+1. Navigate to **Admin** > **Settings** > **SAML**
+2. Click **Download Metadata** button, or
+3. Access the metadata URL directly:
+
+```
+https://your-snipe-it-instance.com/saml/metadata
+```
+
+### Key SP Metadata Values
+
+Your IdP will typically need these values:
+
+- **Entity ID**: `https://your-snipe-it-instance.com`
+- **ACS URL** (Assertion Consumer Service): `https://your-snipe-it-instance.com/saml/acs`
+- **SLS URL** (Single Logout Service): `https://your-snipe-it-instance.com/saml/sls`
+- **NameID Format**: `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress` (or as configured)
+
+## Identity Provider Setup
+
+### Microsoft Azure AD (Entra ID)
+
+<Steps>
+<Step title="Create Enterprise Application">
+1. Sign in to Azure Portal
+2. Navigate to **Azure Active Directory** > **Enterprise Applications**
+3. Click **+ New application**
+4. Click **+ Create your own application**
+5. Enter name: "Snipe-IT"
+6. Select **Integrate any other application you don't find in the gallery**
+7. Click **Create**
+</Step>
+
+<Step title="Configure SAML">
+1. In the Snipe-IT application, go to **Single sign-on**
+2. Select **SAML**
+3. Configure the following:
+
+**Basic SAML Configuration:**
+- Identifier (Entity ID): `https://your-snipe-it-instance.com`
+- Reply URL (ACS): `https://your-snipe-it-instance.com/saml/acs`
+- Logout URL: `https://your-snipe-it-instance.com/saml/sls`
+
+**Attributes & Claims:**
+- Unique User Identifier: `user.userprincipalname` or `user.mail`
+
+4. Download the **Federation Metadata XML**
+5. Upload this XML to Snipe-IT's IdP Metadata field
+</Step>
+
+<Step title="Assign Users">
+1. Go to **Users and groups**
+2. Click **+ Add user/group**
+3. Select users or groups that should have access
+4. Click **Assign**
+</Step>
+</Steps>
+
+**Azure AD Attribute Mapping:**
+
+In Snipe-IT SAML settings, use this username attribute:
+```
+http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
+```
+
+### Okta
+
+<Steps>
+<Step title="Create SAML Application">
+1. Sign in to Okta Admin Console
+2. Navigate to **Applications** > **Applications**
+3. Click **Create App Integration**
+4. Select **SAML 2.0**
+5. Click **Next**
+</Step>
+
+<Step title="Configure SAML Settings">
+**General Settings:**
+- App name: "Snipe-IT"
+
+**SAML Settings:**
+- Single sign-on URL: `https://your-snipe-it-instance.com/saml/acs`
+- Audience URI (SP Entity ID): `https://your-snipe-it-instance.com`
+- Name ID format: `EmailAddress`
+- Application username: `Email`
+
+**Attribute Statements** (Optional):
+- firstName: `user.firstName`
+- lastName: `user.lastName`
+- email: `user.email`
+
+Click **Next**
+</Step>
+
+<Step title="Get Metadata">
+1. After creating the app, go to **Sign On** tab
+2. Scroll to **SAML Signing Certificates**
+3. Copy the **Metadata URL** or download the metadata XML
+4. Add this metadata to Snipe-IT's IdP Metadata field
+</Step>
+
+<Step title="Assign Users">
+1. Go to **Assignments** tab
+2. Click **Assign** > **Assign to People** or **Assign to Groups**
+3. Select users/groups and click **Assign**
+</Step>
+</Steps>
+
+**Okta Attribute Mapping:**
+
+In Snipe-IT SAML settings, use:
+```
+http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier
+```
+
+### Google Workspace
+
+<Steps>
+<Step title="Add Custom SAML App">
+1. Sign in to Google Admin Console
+2. Navigate to **Apps** > **Web and mobile apps**
+3. Click **Add app** > **Add custom SAML app**
+4. Enter app name: "Snipe-IT"
+5. Click **Continue**
+</Step>
+
+<Step title="Download IdP Metadata">
+1. On the Google IdP information page
+2. Click **Download Metadata**
+3. Save the XML file
+4. Click **Continue**
+</Step>
+
+<Step title="Configure Service Provider Details">
+**ACS URL**: `https://your-snipe-it-instance.com/saml/acs`
+**Entity ID**: `https://your-snipe-it-instance.com`
+**Start URL**: `https://your-snipe-it-instance.com` (optional)
+**Name ID**: `Basic Information > Primary email`
+**Name ID format**: `EMAIL`
+
+Click **Continue**
+</Step>
+
+<Step title="Attribute Mapping" icon="map">
+**Google Directory attributes** → **App attributes**:
+- Primary email → `email`
+- First name → `firstName`
+- Last name → `lastName`
+
+Click **Finish**
+</Step>
+
+<Step title="Enable for Users">
+1. Click on the Snipe-IT app
+2. Click **User access**
+3. Select **ON for everyone** or configure for specific OUs
+4. Click **Save**
+</Step>
+</Steps>
+
+**Google Workspace Attribute Mapping:**
+
+In Snipe-IT SAML settings, use:
+```
+http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier
+```
+
+### OneLogin
+
+<Steps>
+<Step title="Add Application">
+1. Log in to OneLogin Admin Portal
+2. Navigate to **Applications** > **Applications**
+3. Click **Add App**
+4. Search for "SAML Test Connector (IdP w/ attr)"
+5. Click on it and give it a display name: "Snipe-IT"
+6. Click **Save**
+</Step>
+
+<Step title="Configure SSO">
+1. Go to **Configuration** tab
+2. Set:
+   - Audience: `https://your-snipe-it-instance.com`
+   - ACS (Consumer) URL: `https://your-snipe-it-instance.com/saml/acs`
+   - Single Logout URL: `https://your-snipe-it-instance.com/saml/sls`
+3. Click **Save**
+</Step>
+
+<Step title="Get Metadata">
+1. Go to **SSO** tab
+2. Copy the **Issuer URL** and paste in a browser
+3. Save the XML metadata
+4. Upload to Snipe-IT's IdP Metadata field
+</Step>
+</Steps>
+
+## Testing SAML
+
+### Initial Test
+
+1. Open an incognito/private browser window
+2. Navigate to your Snipe-IT instance
+3. Click **Login with SAML** (or the configured SSO button)
+4. You should be redirected to your IdP
+5. Log in with your IdP credentials
+6. You should be redirected back to Snipe-IT and logged in
+
+<Warning>
+Always test SAML in a separate browser session before enabling `REQUIRE_SAML=true`. Keep a local admin account for emergency access.
+</Warning>
+
+### Troubleshooting
+
+<AccordionGroup>
+<Accordion title="SAML Login Button Not Showing" icon="eye-slash">
+- Verify SAML is enabled in **Admin** > **Settings** > **SAML**
+- Check that IdP metadata is properly configured
+- Review browser console for JavaScript errors
+- Check `storage/logs/laravel.log` for SAML initialization errors
+</Accordion>
+
+<Accordion title="Redirect Loop or 403 Error" icon="arrow-rotate-right">
+- Verify ACS URL matches exactly in both Snipe-IT and IdP
+- Check that `APP_URL` in `.env` matches your actual URL
+- Ensure HTTPS is enabled if IdP requires it
+- Verify time sync between Snipe-IT server and IdP (use NTP)
+</Accordion>
+
+<Accordion title="User Not Found Error" icon="user-slash">
+- Check username attribute mapping in Snipe-IT SAML settings
+- Users must exist in Snipe-IT before SAML login (auto-provisioning not supported)
+- Create user manually with matching username first
+- Verify the attribute being sent by IdP in SAML response
+</Accordion>
+
+<Accordion title="Certificate Errors" icon="certificate">
+- Ensure IdP certificate is valid and not expired
+- Check system time on Snipe-IT server
+- Verify metadata is up to date
+- Re-download IdP metadata if certificate has been renewed
+</Accordion>
+
+<Accordion title="Debugging SAML Responses" icon="bug">
+Enable debug logging:
+
+1. Set `APP_DEBUG=true` in `.env` (temporarily)
+2. Check `storage/logs/laravel.log` for detailed SAML errors
+3. Use browser developer tools to inspect SAML response
+4. Use SAML debugging tools like SAML-tracer (browser extension)
+
+Remember to disable debug mode after troubleshooting.
+</Accordion>
+</AccordionGroup>
+
+## Advanced Configuration
+
+### Custom SAML Settings
+
+You can add custom SAML settings in the admin interface under **Custom SAML Settings**. Each setting should be on a new line in the format `key=value`.
+
+Example custom settings:
+
+```
+security.wantAssertionsSigned=true
+security.wantNameIdEncrypted=false
+security.authnRequestsSigned=true
+security.logoutRequestSigned=true
+security.signMetadata=true
+security.wantMessagesSigned=true
+security.requestedAuthnContext=false
+```
+
+### Forcing SAML Authentication
+
+To require SAML for all users (disable local login):
+
+```bash .env
+REQUIRE_SAML=true
+```
+
+<Warning>
+Before enabling `REQUIRE_SAML=true`:
+1. Fully test SAML authentication
+2. Create at least one SAML user with admin rights
+3. Document the emergency recovery procedure
+4. Keep database backup for rollback if needed
+</Warning>
+
+### Single Logout (SLO)
+
+Snipe-IT supports SAML Single Logout. When a user logs out of Snipe-IT, they will also be logged out of the identity provider (if configured).
+
+The SLS (Single Logout Service) endpoint is:
+```
+https://your-snipe-it-instance.com/saml/sls
+```
+
+## User Provisioning
+
+<Info>
+Snipe-IT does not currently support automatic user provisioning via SAML. Users must be created in Snipe-IT before they can log in via SAML.
+</Info>
+
+Options for user provisioning:
+
+1. **Manual Creation**: Create users manually in Snipe-IT with usernames matching the SAML NameID
+2. **LDAP Sync**: Use LDAP sync to import users, then use SAML for authentication
+3. **API Import**: Use the API to programmatically create users
+4. **SCIM**: Some organizations use SCIM for automated provisioning (advanced)
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+<Card title="Use HTTPS" icon="lock">
+Always use HTTPS in production. SAML should never be used over HTTP.
+</Card>
+
+<Card title="Sign Requests" icon="signature">
+Generate SP certificates and enable request signing for enhanced security.
+</Card>
+
+<Card title="Validate Certificates" icon="shield-check">
+Ensure IdP certificates are valid and from trusted sources.
+</Card>
+
+<Card title="Keep Metadata Updated" icon="arrows-rotate">
+Regularly update IdP metadata when certificates are renewed.
+</Card>
+
+<Card title="Monitor Logs" icon="file-lines">
+Regularly review authentication logs for suspicious activity.
+</Card>
+
+<Card title="Emergency Access" icon="door-open">
+Maintain a local admin account for emergency access if SAML fails.
+</Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="LDAP Integration" icon="network-wired" href="/integration/ldap">
+  Sync users from Active Directory
+</Card>
+
+<Card title="User Management" icon="users" href="/features/users">
+  Manage user permissions and groups
+</Card>
+</CardGroup>

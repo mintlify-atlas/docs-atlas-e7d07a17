@@ -1,0 +1,324 @@
+---
+title: 'Components'
+description: 'Manage hardware components via the API'
+---
+
+The Components API allows you to manage hardware components like RAM, hard drives, and other parts that can be installed in assets.
+
+## List Components
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/components" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter results
+</ParamField>
+
+<ParamField query="sort" type="string" default="created_at">
+  Column to sort by. Allowed values: `id`, `name`, `category`, `location`, `company`, `manufacturer`, `supplier`, `qty`, `min_amt`, `model_number`, `serial`, `order_number`, `purchase_date`, `purchase_cost`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="category_id" type="integer">
+  Filter by category ID
+</ParamField>
+
+<ParamField query="company_id" type="integer">
+  Filter by company ID
+</ParamField>
+
+<ParamField query="manufacturer_id" type="integer">
+  Filter by manufacturer ID
+</ParamField>
+
+<ParamField query="supplier_id" type="integer">
+  Filter by supplier ID
+</ParamField>
+
+<ParamField query="location_id" type="integer">
+  Filter by location ID
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total number of components
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  Array of component objects
+  <Expandable title="Component Object">
+    <ResponseField name="id" type="integer">
+      Component ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Component name
+    </ResponseField>
+    <ResponseField name="serial" type="string">
+      Serial number
+    </ResponseField>
+    <ResponseField name="model_number" type="string">
+      Model number
+    </ResponseField>
+    <ResponseField name="qty" type="integer">
+      Total quantity
+    </ResponseField>
+    <ResponseField name="remaining" type="integer">
+      Remaining quantity available
+    </ResponseField>
+    <ResponseField name="min_amt" type="integer">
+      Minimum quantity threshold
+    </ResponseField>
+    <ResponseField name="category" type="object">
+      Category information
+    </ResponseField>
+    <ResponseField name="company" type="object">
+      Company information
+    </ResponseField>
+    <ResponseField name="manufacturer" type="object">
+      Manufacturer information
+    </ResponseField>
+    <ResponseField name="supplier" type="object">
+      Supplier information
+    </ResponseField>
+    <ResponseField name="location" type="object">
+      Location information
+    </ResponseField>
+    <ResponseField name="order_number" type="string">
+      Order number
+    </ResponseField>
+    <ResponseField name="purchase_date" type="string">
+      Purchase date
+    </ResponseField>
+    <ResponseField name="purchase_cost" type="string">
+      Purchase cost
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      Component notes
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Get Component by ID
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/components/{component_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="component_id" type="integer" required>
+  The component ID
+</ParamField>
+
+## Create Component
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/components" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "16GB DDR4 RAM",
+    "qty": 50,
+    "category_id": 4,
+    "company_id": 1
+  }'
+```
+</CodeGroup>
+
+<ParamField body="name" type="string" required>
+  Component name
+</ParamField>
+
+<ParamField body="qty" type="integer" required>
+  Total quantity
+</ParamField>
+
+<ParamField body="category_id" type="integer" required>
+  Category ID
+</ParamField>
+
+<ParamField body="company_id" type="integer">
+  Company ID
+</ParamField>
+
+<ParamField body="manufacturer_id" type="integer">
+  Manufacturer ID
+</ParamField>
+
+<ParamField body="supplier_id" type="integer">
+  Supplier ID
+</ParamField>
+
+<ParamField body="location_id" type="integer">
+  Location ID
+</ParamField>
+
+<ParamField body="serial" type="string">
+  Serial number
+</ParamField>
+
+<ParamField body="model_number" type="string">
+  Model number
+</ParamField>
+
+<ParamField body="order_number" type="string">
+  Order number
+</ParamField>
+
+<ParamField body="purchase_date" type="string">
+  Purchase date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="purchase_cost" type="number">
+  Purchase cost
+</ParamField>
+
+<ParamField body="min_amt" type="integer">
+  Minimum quantity threshold for alerts
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Component notes
+</ParamField>
+
+## Update Component
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://your-domain.com/api/v1/components/{component_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Component Name",
+    "qty": 75
+  }'
+```
+</CodeGroup>
+
+<ParamField path="component_id" type="integer" required>
+  The component ID
+</ParamField>
+
+## Delete Component
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://your-domain.com/api/v1/components/{component_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="component_id" type="integer" required>
+  The component ID
+</ParamField>
+
+<Note>A component cannot be deleted if it has any items checked out. All items must be checked in first.</Note>
+
+## Checkout Component
+
+Checkout a component to an asset (components are installed in assets, not assigned to users).
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/components/{component_id}/checkout" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "assigned_to": 456,
+    "assigned_qty": 2,
+    "note": "Installed RAM upgrade"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="component_id" type="integer" required>
+  The component ID
+</ParamField>
+
+<ParamField body="assigned_to" type="integer" required>
+  Asset ID to checkout to (components are assigned to assets, not users)
+</ParamField>
+
+<ParamField body="assigned_qty" type="integer" default="1">
+  Quantity to checkout (must not exceed remaining quantity)
+</ParamField>
+
+<ParamField body="note" type="string">
+  Checkout note
+</ParamField>
+
+## Checkin Component
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/components/{component_asset_id}/checkin" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "note": "Component removed"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="component_asset_id" type="integer" required>
+  The component-asset relationship ID (from the components_assets pivot table)
+</ParamField>
+
+<ParamField body="checkin_qty" type="integer">
+  Quantity to checkin
+</ParamField>
+
+<ParamField body="note" type="string">
+  Checkin note
+</ParamField>
+
+## Get Assets with Component
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/components/{component_id}/assets" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="component_id" type="integer" required>
+  The component ID
+</ParamField>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter assets
+</ParamField>
+
+Returns a list of assets that have this component installed.

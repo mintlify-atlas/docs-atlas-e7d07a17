@@ -1,0 +1,373 @@
+---
+title: 'Users'
+description: 'Manage users via the API'
+---
+
+The Users API allows you to manage users in Snipe-IT.
+
+## List Users
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/users" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter results
+</ParamField>
+
+<ParamField query="sort" type="string" default="created_at">
+  Column to sort by. Allowed values: `id`, `first_name`, `last_name`, `display_name`, `username`, `email`, `jobtitle`, `employee_num`, `company`, `location`, `department`, `manager`, `assets_count`, `licenses_count`, `accessories_count`, `consumables_count`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="company_id" type="integer">
+  Filter by company ID
+</ParamField>
+
+<ParamField query="location_id" type="integer">
+  Filter by location ID
+</ParamField>
+
+<ParamField query="department_id" type="integer">
+  Filter by department ID
+</ParamField>
+
+<ParamField query="activated" type="boolean">
+  Filter by activation status (1 for active, 0 for inactive)
+</ParamField>
+
+<ParamField query="deleted" type="string">
+  Set to "true" to show only deleted users
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total number of users
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  Array of user objects
+  <Expandable title="User Object">
+    <ResponseField name="id" type="integer">
+      User ID
+    </ResponseField>
+    <ResponseField name="username" type="string">
+      Username
+    </ResponseField>
+    <ResponseField name="first_name" type="string">
+      First name
+    </ResponseField>
+    <ResponseField name="last_name" type="string">
+      Last name
+    </ResponseField>
+    <ResponseField name="display_name" type="string">
+      Display name (formatted full name)
+    </ResponseField>
+    <ResponseField name="email" type="string">
+      Email address
+    </ResponseField>
+    <ResponseField name="employee_num" type="string">
+      Employee number
+    </ResponseField>
+    <ResponseField name="jobtitle" type="string">
+      Job title
+    </ResponseField>
+    <ResponseField name="phone" type="string">
+      Phone number
+    </ResponseField>
+    <ResponseField name="mobile" type="string">
+      Mobile number
+    </ResponseField>
+    <ResponseField name="address" type="string">
+      Street address
+    </ResponseField>
+    <ResponseField name="city" type="string">
+      City
+    </ResponseField>
+    <ResponseField name="state" type="string">
+      State/province
+    </ResponseField>
+    <ResponseField name="country" type="string">
+      Country
+    </ResponseField>
+    <ResponseField name="zip" type="string">
+      ZIP/postal code
+    </ResponseField>
+    <ResponseField name="activated" type="boolean">
+      Whether user is activated
+    </ResponseField>
+    <ResponseField name="company" type="object">
+      Company information
+    </ResponseField>
+    <ResponseField name="location" type="object">
+      Location information
+    </ResponseField>
+    <ResponseField name="department" type="object">
+      Department information
+    </ResponseField>
+    <ResponseField name="manager" type="object">
+      Manager information
+    </ResponseField>
+    <ResponseField name="assets_count" type="integer">
+      Number of assets assigned
+    </ResponseField>
+    <ResponseField name="licenses_count" type="integer">
+      Number of licenses assigned
+    </ResponseField>
+    <ResponseField name="accessories_count" type="integer">
+      Number of accessories assigned
+    </ResponseField>
+    <ResponseField name="consumables_count" type="integer">
+      Number of consumables assigned
+    </ResponseField>
+    <ResponseField name="groups" type="array">
+      User's permission groups
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      User notes
+    </ResponseField>
+    <ResponseField name="start_date" type="string">
+      Employment start date
+    </ResponseField>
+    <ResponseField name="end_date" type="string">
+      Employment end date
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Get Current User
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/users/me" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+Returns information about the currently authenticated user.
+
+## Get User by ID
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/users/{user_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="user_id" type="integer" required>
+  The user ID
+</ParamField>
+
+## Create User
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/users" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "John",
+    "last_name": "Doe",
+    "username": "jdoe",
+    "email": "john.doe@example.com",
+    "password": "SecurePassword123!"
+  }'
+```
+</CodeGroup>
+
+<ParamField body="first_name" type="string" required>
+  First name
+</ParamField>
+
+<ParamField body="username" type="string" required>
+  Username (must be unique)
+</ParamField>
+
+<ParamField body="email" type="string">
+  Email address
+</ParamField>
+
+<ParamField body="last_name" type="string">
+  Last name
+</ParamField>
+
+<ParamField body="password" type="string">
+  Password (required unless LDAP user)
+</ParamField>
+
+<ParamField body="employee_num" type="string">
+  Employee number
+</ParamField>
+
+<ParamField body="jobtitle" type="string">
+  Job title
+</ParamField>
+
+<ParamField body="phone" type="string">
+  Phone number
+</ParamField>
+
+<ParamField body="mobile" type="string">
+  Mobile number
+</ParamField>
+
+<ParamField body="company_id" type="integer">
+  Company ID
+</ParamField>
+
+<ParamField body="location_id" type="integer">
+  Location ID
+</ParamField>
+
+<ParamField body="department_id" type="integer">
+  Department ID
+</ParamField>
+
+<ParamField body="manager_id" type="integer">
+  Manager's user ID
+</ParamField>
+
+<ParamField body="activated" type="boolean" default="true">
+  Whether user is activated
+</ParamField>
+
+<ParamField body="address" type="string">
+  Street address
+</ParamField>
+
+<ParamField body="city" type="string">
+  City
+</ParamField>
+
+<ParamField body="state" type="string">
+  State/province
+</ParamField>
+
+<ParamField body="country" type="string">
+  Country
+</ParamField>
+
+<ParamField body="zip" type="string">
+  ZIP/postal code
+</ParamField>
+
+<ParamField body="notes" type="string">
+  User notes
+</ParamField>
+
+## Update User
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://your-domain.com/api/v1/users/{user_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "Jane",
+    "jobtitle": "Senior Developer"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="user_id" type="integer" required>
+  The user ID
+</ParamField>
+
+## Delete User
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://your-domain.com/api/v1/users/{user_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="user_id" type="integer" required>
+  The user ID
+</ParamField>
+
+<Note>Users with checked out assets cannot be deleted until all assets are checked in or transferred.</Note>
+
+## Get User's Assets
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/users/{user_id}/assets" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="user_id" type="integer" required>
+  The user ID
+</ParamField>
+
+Returns all assets assigned to the specified user.
+
+## Get User's Licenses
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/users/{user_id}/licenses" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="user_id" type="integer" required>
+  The user ID
+</ParamField>
+
+Returns all license seats assigned to the specified user.
+
+## Get User's Accessories
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/users/{user_id}/accessories" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="user_id" type="integer" required>
+  The user ID
+</ParamField>
+
+Returns all accessories assigned to the specified user.
+
+## Restore Deleted User
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/users/{user_id}/restore" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="user_id" type="integer" required>
+  The deleted user ID
+</ParamField>
+
+Restores a soft-deleted user.

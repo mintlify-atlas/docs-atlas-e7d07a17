@@ -1,0 +1,190 @@
+---
+title: 'Categories'
+description: 'Manage categories via the API'
+---
+
+The Categories API allows you to manage categories for assets, accessories, consumables, components, and licenses.
+
+## List Categories
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/categories" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter results
+</ParamField>
+
+<ParamField query="sort" type="string" default="assets_count">
+  Column to sort by. Allowed values: `id`, `name`, `category_type`, `use_default_eula`, `eula_text`, `require_acceptance`, `checkin_email`, `assets_count`, `accessories_count`, `consumables_count`, `components_count`, `licenses_count`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="category_type" type="string">
+  Filter by category type: `asset`, `accessory`, `consumable`, `component`, `license`
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total number of categories
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  Array of category objects
+  <Expandable title="Category Object">
+    <ResponseField name="id" type="integer">
+      Category ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Category name
+    </ResponseField>
+    <ResponseField name="category_type" type="string">
+      Type of category: `asset`, `accessory`, `consumable`, `component`, or `license`
+    </ResponseField>
+    <ResponseField name="eula_text" type="string">
+      EULA text for this category
+    </ResponseField>
+    <ResponseField name="use_default_eula" type="boolean">
+      Whether to use the default EULA
+    </ResponseField>
+    <ResponseField name="require_acceptance" type="boolean">
+      Whether acceptance is required for items in this category
+    </ResponseField>
+    <ResponseField name="checkin_email" type="boolean">
+      Whether to send email on checkin
+    </ResponseField>
+    <ResponseField name="assets_count" type="integer">
+      Number of assets in this category
+    </ResponseField>
+    <ResponseField name="accessories_count" type="integer">
+      Number of accessories in this category
+    </ResponseField>
+    <ResponseField name="consumables_count" type="integer">
+      Number of consumables in this category
+    </ResponseField>
+    <ResponseField name="components_count" type="integer">
+      Number of components in this category
+    </ResponseField>
+    <ResponseField name="licenses_count" type="integer">
+      Number of licenses in this category
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      Category notes
+    </ResponseField>
+    <ResponseField name="image" type="string">
+      Category image URL
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Get Category by ID
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/categories/{category_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="category_id" type="integer" required>
+  The category ID
+</ParamField>
+
+## Create Category
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/categories" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Laptops",
+    "category_type": "asset",
+    "require_acceptance": true,
+    "checkin_email": true
+  }'
+```
+</CodeGroup>
+
+<ParamField body="name" type="string" required>
+  Category name
+</ParamField>
+
+<ParamField body="category_type" type="string" required>
+  Type of category. Allowed values: `asset`, `accessory`, `consumable`, `component`, `license`
+</ParamField>
+
+<ParamField body="eula_text" type="string">
+  EULA text for this category
+</ParamField>
+
+<ParamField body="use_default_eula" type="boolean" default="false">
+  Whether to use the default EULA from settings
+</ParamField>
+
+<ParamField body="require_acceptance" type="boolean" default="false">
+  Whether user acceptance is required when checking out items in this category
+</ParamField>
+
+<ParamField body="checkin_email" type="boolean" default="false">
+  Whether to send email notification on checkin
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Category notes
+</ParamField>
+
+<ParamField body="image" type="string">
+  Base64 encoded image or image file
+</ParamField>
+
+## Update Category
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://your-domain.com/api/v1/categories/{category_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Category Name",
+    "require_acceptance": false
+  }'
+```
+</CodeGroup>
+
+<ParamField path="category_id" type="integer" required>
+  The category ID
+</ParamField>
+
+## Delete Category
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://your-domain.com/api/v1/categories/{category_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="category_id" type="integer" required>
+  The category ID
+</ParamField>
+
+<Note>A category cannot be deleted if it has associated items. You must first reassign or delete all assets, accessories, consumables, components, or licenses in this category.</Note>

@@ -1,0 +1,388 @@
+---
+title: Categories
+description: Organize assets, accessories, consumables, components, and licenses with categories
+---
+
+Categories are a fundamental organizational structure in Snipe-IT that group similar items together and control their behavior. Categories apply to all item types: assets, accessories, consumables, components, and licenses.
+
+## Understanding Categories
+
+Categories serve two primary purposes:
+
+1. **Organization** - Group similar items for easier management and reporting
+2. **Behavior Control** - Define policies like EULA acceptance requirements and checkout notifications
+
+<Info>
+  Categories are higher-level than Asset Models. For example:
+  - **Category**: "Laptops" → **Models**: "MacBook Pro 16", "Dell XPS 15", "ThinkPad X1"
+  - **Category**: "Monitors" → **Models**: "Dell U2720Q", "LG 27UK850"
+</Info>
+
+## Category Types
+
+Each category must have a specific type, which determines what items can be assigned to it:
+
+<Tabs>
+  <Tab title="Asset">
+    For physical assets that can be checked out to users, locations, or other assets.
+    
+    **Examples:**
+    - Laptops
+    - Desktops
+    - Monitors
+    - Phones
+    - Tablets
+    - Peripherals
+  </Tab>
+  
+  <Tab title="Accessory">
+    For items that are checked out but don't have unique serial numbers or tracking.
+    
+    **Examples:**
+    - Keyboards
+    - Mice
+    - Cables
+    - Adapters
+    - Headphones
+  </Tab>
+  
+  <Tab title="Consumable">
+    For items that are consumed and not returned.
+    
+    **Examples:**
+    - Toner cartridges
+    - Paper
+    - USB drives (if not tracked individually)
+    - Office supplies
+  </Tab>
+  
+  <Tab title="Component">
+    For parts that are installed into assets.
+    
+    **Examples:**
+    - RAM modules
+    - Hard drives
+    - Graphics cards
+    - Batteries
+  </Tab>
+  
+  <Tab title="License">
+    For software licenses and subscriptions.
+    
+    **Examples:**
+    - Microsoft Office
+    - Adobe Creative Cloud
+    - Operating System licenses
+    - SaaS subscriptions
+  </Tab>
+</Tabs>
+
+## Creating a Category
+
+### Step 1: Navigate to Categories
+
+Go to **Settings** (gear icon) > **Categories** in the admin interface.
+
+### Step 2: Create New Category
+
+Click **Create New** and configure the following:
+
+<ParamField path="Name" type="string" required>
+  The category name (e.g., "Laptops", "Network Equipment", "Software Licenses").
+  
+  **Note:** Category names must be unique within their category type.
+</ParamField>
+
+<ParamField path="Category Type" type="select" required>
+  Select from: Asset, Accessory, Consumable, Component, or License.
+  
+  **Warning:** The category type cannot be changed after creation.
+</ParamField>
+
+<ParamField path="EULA" type="textarea">
+  End User License Agreement text that users must accept when checking out items from this category.
+  
+  Supports Markdown formatting.
+</ParamField>
+
+<ParamField path="Use Default EULA" type="boolean">
+  Use the system-wide default EULA instead of a category-specific one.
+  
+  Set the default EULA in **Settings** > **General** > **Default EULA**.
+</ParamField>
+
+<ParamField path="Require Acceptance" type="boolean">
+  Force users to accept the EULA before checking out items from this category.
+  
+  Users must click "Accept" and the acceptance is logged in the activity log.
+</ParamField>
+
+<ParamField path="Send Email on Check-in/Check-out" type="boolean">
+  Send an email notification to the category admin when items are checked in or out.
+  
+  The recipient is set in the category's admin field.
+</ParamField>
+
+<ParamField path="Alert on Response" type="boolean">
+  Send alerts when users respond to EULA acceptance requests.
+</ParamField>
+
+<ParamField path="Notes" type="textarea">
+  Internal notes about the category (not visible to end users).
+</ParamField>
+
+<ParamField path="Tag Color" type="color">
+  Optional color code for visual organization in the interface.
+</ParamField>
+
+## Category Behavior Settings
+
+### EULA Management
+
+Categories can enforce End User License Agreements for assets. This is defined in `app/Models/Category.php:256-266`:
+
+```php
+public function getEula()
+{
+    if ($this->eula_text) {
+        return Helper::parseEscapedMarkedown($this->eula_text);
+    } elseif ((Setting::getSettings()->default_eula_text) && ($this->use_default_eula == '1')) {
+        return Helper::parseEscapedMarkedown(Setting::getSettings()->default_eula_text);
+    } else {
+        return null;
+    }
+}
+```
+
+The EULA hierarchy works as follows:
+1. If category has custom EULA text → use category EULA
+2. Else if "Use Default EULA" is enabled → use system default
+3. Else → no EULA required
+
+### Checkout Email Notifications
+
+When **Send Email on Check-in/Check-out** is enabled, the checkin_email attribute is stored as a boolean value (`app/Models/Category.php:283-286`):
+
+```php
+public function setCheckinEmailAttribute($value)
+{
+    $this->attributes['checkin_email'] = (int) filter_var($value, FILTER_VALIDATE_BOOLEAN);
+}
+```
+
+## Organizing with Categories
+
+### Best Practices for Category Structure
+
+<Check>
+  **Use broad categories** - Create categories that group similar items, not individual models.
+  
+  Good: "Laptops", "Desktop Computers", "Network Equipment"
+  
+  Bad: "MacBook Pro 2023", "Dell Latitude 5420", "Cisco Switch 2960"
+</Check>
+
+<Check>
+  **Align with procurement** - Structure categories to match how your organization purchases and budgets.
+</Check>
+
+<Check>
+  **Consider reporting needs** - Categories appear in reports, so organize in a way that supports your reporting requirements.
+</Check>
+
+<Check>
+  **Set consistent policies** - Use category-level settings (EULA, notifications) to enforce consistent policies across similar items.
+</Check>
+
+### Example Category Structure
+
+**Asset Categories:**
+- Laptops (Require Acceptance: Yes)
+- Desktop Computers (Require Acceptance: Yes)
+- Monitors (Require Acceptance: No)
+- Mobile Devices (Require Acceptance: Yes, with Mobile Device Policy EULA)
+- Network Equipment (Require Acceptance: No)
+- Printers (Require Acceptance: No)
+
+**Accessory Categories:**
+- Keyboards & Mice
+- Cables & Adapters
+- Docking Stations
+- Headsets
+
+**Consumable Categories:**
+- Printer Supplies
+- Office Supplies
+- Storage Media
+
+**Component Categories:**
+- Memory (RAM)
+- Storage Drives
+- Graphics Cards
+- Batteries
+
+**License Categories:**
+- Operating Systems
+- Productivity Software
+- Design Software
+- Development Tools
+
+## Category Relationships
+
+Categories have several important relationships defined in `app/Models/Category.php`:
+
+### Assets
+
+Categories relate to assets through models:
+
+```php
+public function assets()
+{
+    return $this->hasManyThrough(Asset::class, \App\Models\AssetModel::class, 'category_id', 'model_id');
+}
+```
+
+### Asset Models
+
+Asset models belong to a category:
+
+```php
+public function models()
+{
+    return $this->hasMany(\App\Models\AssetModel::class, 'category_id');
+}
+```
+
+### Other Item Types
+
+Direct relationships exist for other types:
+
+```php
+public function accessories() // For accessory categories
+public function consumables()  // For consumable categories
+public function components()   // For component categories
+public function licenses()     // For license categories
+```
+
+## Deleting Categories
+
+Categories can only be deleted if they meet specific criteria (`app/Models/Category.php:103-117`):
+
+<Warning>
+  A category can only be deleted if:
+  - You have the `delete` permission for categories
+  - The category contains zero items
+  - For asset categories: zero associated models exist
+  - The category is not soft-deleted
+</Warning>
+
+To delete a category with existing items:
+1. Reassign all items to a different category
+2. For asset categories, reassign or delete all models
+3. Then delete the category
+
+## Permissions
+
+Category management requires specific permissions defined in `config/permissions.php:277-294`:
+
+- `categories.view` - View categories
+- `categories.create` - Create new categories
+- `categories.edit` - Edit existing categories
+- `categories.delete` - Delete categories
+
+## API Access
+
+Categories are accessible via the REST API:
+
+### List All Categories
+
+```bash
+GET /api/v1/categories
+```
+
+### Get Specific Category
+
+```bash
+GET /api/v1/categories/{id}
+```
+
+### Create Category
+
+```bash
+POST /api/v1/categories
+```
+
+```json
+{
+  "name": "Laptops",
+  "category_type": "asset",
+  "require_acceptance": true,
+  "checkin_email": false,
+  "eula_text": "By accepting this laptop, you agree to..."
+}
+```
+
+## Reporting with Categories
+
+Categories are a primary dimension in Snipe-IT reports:
+
+- **Assets by Category** - See asset counts and values grouped by category
+- **Category Depreciation** - Track depreciation across categories
+- **License Compliance** - Report on software licenses by category
+
+You can filter most reports by category to focus on specific asset types.
+
+## Advanced: Category Scoping
+
+Categories support advanced query scoping for filtering (`app/Models/Category.php:302-321`):
+
+```php
+// Filter by category name or type
+$categories = Category::byFilter(['name' => 'Laptop'])->get();
+
+// Get only categories that require acceptance
+$requireAcceptance = Category::requiresAcceptance()->get();
+```
+
+## Troubleshooting
+
+### "Category name already exists"
+
+Category names must be unique per category type. You can have "Accessories" as both an Asset category and an Accessory category, but not two Asset categories with the same name.
+
+This is enforced by the validation rule in `app/Models/Category.php:44`:
+
+```php
+'name' => 'required|min:1|max:255|two_column_unique_undeleted:category_type'
+```
+
+### Cannot Change Category Type
+
+Category type is immutable after creation. If you need to change the type:
+1. Create a new category with the desired type
+2. Reassign all items to the new category
+3. Delete the old category
+
+### Category Not Appearing in Dropdowns
+
+Ensure:
+- The category type matches the item type you're creating
+- You have permission to view the category
+- The category is not soft-deleted
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Assets" icon="cube" href="/features/assets">
+    Learn about asset management
+  </Card>
+  <Card title="Custom Fields" icon="input-text" href="/admin/custom-fields">
+    Add custom fields via fieldsets linked to models
+  </Card>
+  <Card title="Asset Management" icon="right-from-bracket" href="/features/assets">
+    Check out assets with EULA acceptance
+  </Card>
+  <Card title="API Reference" icon="chart-bar" href="/api/categories">
+    Use the Categories API
+  </Card>
+</CardGroup>

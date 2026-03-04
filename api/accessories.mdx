@@ -1,0 +1,312 @@
+---
+title: 'Accessories'
+description: 'Manage accessories via the API'
+---
+
+The Accessories API allows you to manage accessories such as keyboards, mice, and other peripherals.
+
+## List Accessories
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/accessories" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter results
+</ParamField>
+
+<ParamField query="sort" type="string" default="created_at">
+  Column to sort by. Allowed values: `id`, `name`, `model_number`, `category`, `location`, `company`, `manufacturer`, `supplier`, `qty`, `min_amt`, `order_number`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="category_id" type="integer">
+  Filter by category ID
+</ParamField>
+
+<ParamField query="company_id" type="integer">
+  Filter by company ID
+</ParamField>
+
+<ParamField query="manufacturer_id" type="integer">
+  Filter by manufacturer ID
+</ParamField>
+
+<ParamField query="supplier_id" type="integer">
+  Filter by supplier ID
+</ParamField>
+
+<ParamField query="location_id" type="integer">
+  Filter by location ID
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total number of accessories
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  Array of accessory objects
+  <Expandable title="Accessory Object">
+    <ResponseField name="id" type="integer">
+      Accessory ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Accessory name
+    </ResponseField>
+    <ResponseField name="model_number" type="string">
+      Model number
+    </ResponseField>
+    <ResponseField name="qty" type="integer">
+      Total quantity
+    </ResponseField>
+    <ResponseField name="remaining_qty" type="integer">
+      Remaining quantity available
+    </ResponseField>
+    <ResponseField name="min_amt" type="integer">
+      Minimum quantity threshold
+    </ResponseField>
+    <ResponseField name="category" type="object">
+      Category information
+    </ResponseField>
+    <ResponseField name="company" type="object">
+      Company information
+    </ResponseField>
+    <ResponseField name="manufacturer" type="object">
+      Manufacturer information
+    </ResponseField>
+    <ResponseField name="supplier" type="object">
+      Supplier information
+    </ResponseField>
+    <ResponseField name="location" type="object">
+      Location information
+    </ResponseField>
+    <ResponseField name="order_number" type="string">
+      Order number
+    </ResponseField>
+    <ResponseField name="purchase_date" type="string">
+      Purchase date
+    </ResponseField>
+    <ResponseField name="purchase_cost" type="string">
+      Purchase cost
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      Accessory notes
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Get Accessory by ID
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/accessories/{accessory_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="accessory_id" type="integer" required>
+  The accessory ID
+</ParamField>
+
+## Create Accessory
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/accessories" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "USB Mouse",
+    "qty": 50,
+    "category_id": 2,
+    "company_id": 1
+  }'
+```
+</CodeGroup>
+
+<ParamField body="name" type="string" required>
+  Accessory name
+</ParamField>
+
+<ParamField body="qty" type="integer" required>
+  Total quantity
+</ParamField>
+
+<ParamField body="category_id" type="integer" required>
+  Category ID
+</ParamField>
+
+<ParamField body="company_id" type="integer">
+  Company ID
+</ParamField>
+
+<ParamField body="manufacturer_id" type="integer">
+  Manufacturer ID
+</ParamField>
+
+<ParamField body="supplier_id" type="integer">
+  Supplier ID
+</ParamField>
+
+<ParamField body="location_id" type="integer">
+  Location ID
+</ParamField>
+
+<ParamField body="model_number" type="string">
+  Model number
+</ParamField>
+
+<ParamField body="order_number" type="string">
+  Order number
+</ParamField>
+
+<ParamField body="purchase_date" type="string">
+  Purchase date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="purchase_cost" type="number">
+  Purchase cost
+</ParamField>
+
+<ParamField body="min_amt" type="integer">
+  Minimum quantity threshold for alerts
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Accessory notes
+</ParamField>
+
+## Update Accessory
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://your-domain.com/api/v1/accessories/{accessory_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Accessory Name",
+    "qty": 75
+  }'
+```
+</CodeGroup>
+
+<ParamField path="accessory_id" type="integer" required>
+  The accessory ID
+</ParamField>
+
+## Delete Accessory
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://your-domain.com/api/v1/accessories/{accessory_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="accessory_id" type="integer" required>
+  The accessory ID
+</ParamField>
+
+<Note>An accessory cannot be deleted if it has any checkouts. All items must be checked in first.</Note>
+
+## Checkout Accessory
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/accessories/{accessory_id}/checkout" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "assigned_to": 123,
+    "checkout_qty": 2,
+    "note": "Assigned to employee"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="accessory_id" type="integer" required>
+  The accessory ID
+</ParamField>
+
+<ParamField body="assigned_to" type="integer" required>
+  User ID to checkout to
+</ParamField>
+
+<ParamField body="checkout_qty" type="integer" default="1">
+  Quantity to checkout
+</ParamField>
+
+<ParamField body="note" type="string">
+  Checkout note
+</ParamField>
+
+## Checkin Accessory
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/accessories/{accessory_id}/checkin" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "assigned_to": 123,
+    "note": "Returned"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="accessory_id" type="integer" required>
+  The accessory ID
+</ParamField>
+
+<ParamField body="assigned_to" type="integer" required>
+  User ID who has the accessory checked out
+</ParamField>
+
+<ParamField body="note" type="string">
+  Checkin note
+</ParamField>
+
+## Get Checked Out Items
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/accessories/{accessory_id}/checkedout" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="accessory_id" type="integer" required>
+  The accessory ID
+</ParamField>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+Returns a list of all checkouts for a specific accessory, including who it's checked out to and when.

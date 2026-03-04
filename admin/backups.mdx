@@ -1,0 +1,466 @@
+---
+title: Backups
+description: Configure automated database and file backups using Spatie Laravel Backup
+---
+
+Snipe-IT includes built-in backup functionality powered by the [Spatie Laravel Backup](https://github.com/spatie/laravel-backup) package. This feature creates comprehensive backups of your database and critical files.
+
+## Understanding Snipe-IT Backups
+
+Snipe-IT backups include:
+
+1. **Database dump** - Complete MySQL/MariaDB database export
+2. **Uploaded files** - Asset images, user photos, license files, etc. (in `public/uploads`)
+3. **Private uploads** - Documents requiring authentication (in `storage/private_uploads`)
+4. **OAuth keys** - OAuth private and public keys (in `storage/`)
+5. **Environment file** - Your `.env` configuration (optional)
+
+<Info>
+  Backups are stored as compressed `.zip` files with the naming pattern:
+  `snipe-it-YYYY-MM-DD-HH-MM-SS.zip`
+</Info>
+
+## Backup Configuration
+
+Backup settings are configured in your `.env` file and managed by `config/backup.php`.
+
+### Basic Backup Settings
+
+```bash .env
+# Backup notifications
+MAIL_BACKUP_NOTIFICATION_DRIVER=mail
+MAIL_BACKUP_NOTIFICATION_ADDRESS=admin@company.com
+
+# Include .env file in backups
+BACKUP_ENV=true
+
+# Allow backup deletion via UI
+ALLOW_BACKUP_DELETE=false
+
+# Allow data purge (dangerous!)
+ALLOW_DATA_PURGE=false
+```
+
+<ParamField path="MAIL_BACKUP_NOTIFICATION_DRIVER" type="string" default="null">
+  Email driver for backup notifications. Set to `mail` to receive backup status emails.
+</ParamField>
+
+<ParamField path="MAIL_BACKUP_NOTIFICATION_ADDRESS" type="string">
+  Email address to receive backup success/failure notifications.
+</ParamField>
+
+<ParamField path="BACKUP_ENV" type="boolean" default="true">
+  Include the `.env` file in backups. 
+  
+  **Important:** Your `.env` contains sensitive credentials. Only enable if backups are stored securely.
+</ParamField>
+
+<ParamField path="ALLOW_BACKUP_DELETE" type="boolean" default="false">
+  Allow admins to delete backups via the web interface.
+</ParamField>
+
+<ParamField path="ALLOW_DATA_PURGE" type="boolean" default="false">
+  Enable the dangerous data purge feature. Only enable for testing/demo environments.
+</ParamField>
+
+<ParamField path="BACKUP_TIME_LIMIT" type="integer" default="600">
+  Maximum execution time for backup operations (in seconds).
+</ParamField>
+
+### Backup Retention Policy
+
+Snipe-IT uses an intelligent retention strategy that keeps more recent backups and gradually thins out older ones:
+
+```bash .env
+# Keep ALL backups for this many days
+ALL_BACKUP_KEEP_DAYS=7
+
+# After that, keep ONE backup per day for this many days
+DAILY_BACKUP_KEEP_DAYS=16
+
+# After that, keep ONE backup per week for this many weeks
+WEEKLY_BACKUP_KEEP_WEEKS=8
+
+# After that, keep ONE backup per month for this many months
+MONTHLY_BACKUP_KEEP_MONTHS=4
+
+# After that, keep ONE backup per year for this many years
+YEARLY_BACKUP_KEEP_YEARS=2
+
+# Delete oldest backups when total size exceeds this (in MB)
+BACKUP_PURGE_OLDEST_AT_MEGS=5000
+```
+
+This configuration is defined in `config/backup.php:205-236`:
+
+```php
+'keep_all_backups_for_days' => env('ALL_BACKUP_KEEP_DAYS', 7),
+'keep_daily_backups_for_days' => env('DAILY_BACKUP_KEEP_DAYS', 16),
+'keep_weekly_backups_for_weeks' => env('WEEKLY_BACKUP_KEEP_WEEKS', 8),
+'keep_monthly_backups_for_months' => env('MONTHLY_BACKUP_KEEP_MONTHS', 4),
+'keep_yearly_backups_for_years' => env('YEARLY_BACKUP_KEEP_YEARS', 2),
+'delete_oldest_backups_when_using_more_megabytes_than' => env('BACKUP_PURGE_OLDEST_AT_MEGS', 5000),
+```
+
+### Example Retention Timeline
+
+With default settings:
+- **Days 1-7:** All backups kept
+- **Days 8-23:** One backup per day (16 days)
+- **Days 24-79:** One backup per week (8 weeks)
+- **Days 80-199:** One backup per month (4 months)  
+- **After day 200:** One backup per year (2 years)
+
+<Check>
+  This gives you:
+  - Recent granular recovery options (hourly/daily)
+  - Long-term archival with reduced storage
+  - Automatic cleanup of old backups
+</Check>
+
+## What Gets Backed Up
+
+The backup includes these directories and files (from `config/backup.php:12-22`):
+
+```php
+$included_dirs = [
+    base_path('public/uploads'),              // User-uploaded files
+    base_path('storage/private_uploads'),     // Private documents
+    base_path('storage/oauth-private.key'),   // OAuth private key
+    base_path('storage/oauth-public.key'),    // OAuth public key
+];
+
+if (env('BACKUP_ENV') == 'true') {
+    $included_dirs[] = base_path('.env');     // Environment config
+}
+```
+
+The backup **excludes** (from `config/backup.php:55-59`):
+- `vendor/` - PHP dependencies (can be reinstalled)
+- `node_modules/` - JavaScript dependencies (can be reinstalled)
+- `config/` - Generated config cache
+
+## Creating Backups
+
+### Manual Backup via Web Interface
+
+1. Navigate to **Settings** > **Backups**
+2. Click **Create Backup**
+3. Wait for the backup to complete
+4. Download the `.zip` file
+
+### Manual Backup via Command Line
+
+Run the Artisan command:
+
+```bash
+php artisan snipeit:backup
+```
+
+Or use the underlying Laravel Backup command:
+
+```bash
+php artisan backup:run
+```
+
+### Automated Backups with Cron
+
+Add this to your crontab to run daily backups at 2 AM:
+
+```bash
+0 2 * * * cd /path/to/snipe-it && php artisan backup:run --only-db >> /dev/null 2>&1
+```
+
+For weekly full backups (database + files) every Sunday at 3 AM:
+
+```bash
+0 3 * * 0 cd /path/to/snipe-it && php artisan backup:run >> /dev/null 2>&1
+```
+
+<Info>
+  Database-only backups (`--only-db`) are much faster and smaller. Run full backups less frequently.
+</Info>
+
+## Backup Storage Locations
+
+By default, backups are stored in:
+
+```
+storage/app/backups/
+```
+
+This is configured in `config/backup.php:100-102`:
+
+```php
+'disks' => [
+    'backup',
+],
+```
+
+The `backup` disk is defined in `config/filesystems.php` and points to `storage/app/backups/`.
+
+### Storing Backups on S3
+
+For production environments, store backups off-site to protect against hardware failure:
+
+1. Configure S3 credentials in `.env`:
+   ```bash
+   AWS_ACCESS_KEY_ID=your-key
+   AWS_SECRET_ACCESS_KEY=your-secret
+   AWS_DEFAULT_REGION=us-west-2
+   AWS_BUCKET=snipeit-backups
+   ```
+
+2. Update `config/backup.php` destination disks:
+   ```php
+   'disks' => [
+       'backup',  // Local copy
+       's3',      // S3 copy
+   ],
+   ```
+
+3. Run the backup - it will be stored both locally and on S3
+
+## Backup Notifications
+
+Snipe-IT can send email notifications for backup events (from `config/backup.php:123-130`):
+
+- `BackupHasFailedNotification` - Backup failed
+- `UnhealthyBackupWasFoundNotification` - Backup is too old or too large
+- `CleanupHasFailedNotification` - Backup cleanup failed
+- `BackupWasSuccessfulNotification` - Backup succeeded
+- `HealthyBackupWasFoundNotification` - Backup health check passed
+- `CleanupWasSuccessfulNotification` - Old backups cleaned up
+
+Configure the notification email:
+
+```bash .env
+MAIL_BACKUP_NOTIFICATION_DRIVER=mail
+MAIL_BACKUP_NOTIFICATION_ADDRESS=backup-alerts@company.com
+```
+
+## Backup Monitoring
+
+Snipe-IT monitors backup health (from `config/backup.php:181-190`):
+
+```php
+'monitor_backups' => [
+    [
+        'name' => config('app.name'),
+        'disks' => [env('PRIVATE_FILESYSTEM_DISK', 'local')],
+        'health_checks' => [
+            \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays::class => 1,
+            \Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes::class => 5000,
+        ],
+    ],
+],
+```
+
+This monitors:
+- **Maximum Age:** Alerts if newest backup is older than 1 day
+- **Maximum Storage:** Alerts if total backup size exceeds 5000 MB
+
+Run the monitor manually:
+
+```bash
+php artisan backup:monitor
+```
+
+Or add to cron for automated monitoring:
+
+```bash
+0 6 * * * cd /path/to/snipe-it && php artisan backup:monitor
+```
+
+## Restoring from Backup
+
+<Warning>
+  Always test your backup restoration procedure in a non-production environment first.
+</Warning>
+
+### Step 1: Download the Backup
+
+From **Settings** > **Backups**, download the backup `.zip` file you want to restore.
+
+### Step 2: Extract the Backup
+
+```bash
+unzip snipe-it-2024-03-01-02-00-00.zip -d /tmp/restore/
+```
+
+### Step 3: Restore the Database
+
+The database dump is in the extracted files:
+
+```bash
+mysql -u snipeit_user -p snipeit_db < /tmp/restore/db-dumps/mysql-snipeit.sql
+```
+
+### Step 4: Restore Files
+
+Copy uploaded files back:
+
+```bash
+# Public uploads
+cp -r /tmp/restore/public/uploads/* /path/to/snipe-it/public/uploads/
+
+# Private uploads
+cp -r /tmp/restore/storage/private_uploads/* /path/to/snipe-it/storage/private_uploads/
+
+# OAuth keys
+cp /tmp/restore/storage/oauth-*.key /path/to/snipe-it/storage/
+```
+
+### Step 5: Restore .env (if backed up)
+
+```bash
+cp /tmp/restore/.env /path/to/snipe-it/.env
+```
+
+### Step 6: Set Permissions
+
+```bash
+cd /path/to/snipe-it
+chown -R www-data:www-data storage public/uploads
+chmod -R 755 storage public/uploads
+```
+
+### Step 7: Clear Caches
+
+```bash
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+```
+
+## Database Sanitization
+
+For development/testing environments, you can sanitize sensitive data during backup:
+
+```bash .env
+DB_SANITIZE_BY_DEFAULT=true
+```
+
+This is configured in `config/backup.php:240`:
+
+```php
+'sanitize_by_default' => env('DB_SANITIZE_BY_DEFAULT', false),
+```
+
+<Warning>
+  Sanitized backups remove or anonymize sensitive data and cannot be used to restore a production environment.
+</Warning>
+
+## Backup Cleanup
+
+Manually trigger cleanup of old backups:
+
+```bash
+php artisan backup:clean
+```
+
+This applies the retention policy defined in your `.env` file and deletes backups that exceed the retention thresholds.
+
+Add to cron for automated cleanup:
+
+```bash
+0 4 * * * cd /path/to/snipe-it && php artisan backup:clean
+```
+
+## Best Practices
+
+<Check>
+  **Store backups off-site** - Use S3 or another cloud storage provider to protect against hardware failure or disasters.
+</Check>
+
+<Check>
+  **Test restores regularly** - A backup is only useful if you can restore from it. Test the restoration process quarterly.
+</Check>
+
+<Check>
+  **Monitor backup health** - Set up the backup monitor cron job and configure email notifications.
+</Check>
+
+<Check>
+  **Secure backup files** - Backups contain sensitive data including your `APP_KEY`. Encrypt or restrict access to backup files.
+</Check>
+
+<Check>
+  **Separate database and file backups** - Run database backups more frequently (daily) and full backups less often (weekly).
+</Check>
+
+<Check>
+  **Document your restoration procedure** - Keep step-by-step restoration instructions with your disaster recovery plan.
+</Check>
+
+## Troubleshooting
+
+### "Backup failed" Error
+
+Check the Laravel logs in `storage/logs/laravel.log` for details. Common causes:
+
+- Insufficient disk space
+- Database connection issues  
+- Permission problems on `storage/app/backups/`
+- PHP timeout (increase `BACKUP_TIME_LIMIT`)
+
+### Large Backup Files
+
+If backups are too large:
+
+1. Run database-only backups more frequently: `php artisan backup:run --only-db`
+2. Exclude large files that don't need backing up
+3. Compress uploads before backing up
+4. Increase `BACKUP_PURGE_OLDEST_AT_MEGS` if you have sufficient storage
+
+### Cannot Download Backup
+
+Ensure:
+- The web server can read `storage/app/backups/`
+- PHP's `max_execution_time` is sufficient for large downloads
+- PHP's `memory_limit` allows the file to be served
+
+### Backup Takes Too Long
+
+Increase the time limit:
+
+```bash .env
+BACKUP_TIME_LIMIT=1200
+```
+
+Or run backups via CLI cron instead of the web interface to avoid web server timeouts.
+
+## Automated Backup Script Example
+
+Complete crontab for comprehensive backup automation:
+
+```bash
+# Daily database backup at 2 AM
+0 2 * * * cd /path/to/snipe-it && php artisan backup:run --only-db > /dev/null 2>&1
+
+# Weekly full backup (DB + files) on Sunday at 3 AM
+0 3 * * 0 cd /path/to/snipe-it && php artisan backup:run > /dev/null 2>&1
+
+# Daily cleanup at 4 AM
+0 4 * * * cd /path/to/snipe-it && php artisan backup:clean > /dev/null 2>&1
+
+# Daily health monitoring at 6 AM
+0 6 * * * cd /path/to/snipe-it && php artisan backup:monitor > /dev/null 2>&1
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/admin/configuration">
+    Configure backup email notifications
+  </Card>
+  <Card title="Security" icon="shield-halved" href="/admin/security">
+    Secure your backup files and .env
+  </Card>
+  <Card title="Installation Guide" icon="server" href="/installation">
+    Configure cron jobs for automated backups
+  </Card>
+  <Card title="Configuration" icon="wrench" href="/admin/configuration">
+    Configure backup settings
+  </Card>
+</CardGroup>

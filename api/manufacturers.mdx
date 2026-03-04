@@ -1,0 +1,204 @@
+---
+title: 'Manufacturers'
+description: 'Manage manufacturers via the API'
+---
+
+The Manufacturers API allows you to manage equipment and software manufacturers.
+
+## List Manufacturers
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/manufacturers" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter results
+</ParamField>
+
+<ParamField query="sort" type="string" default="created_at">
+  Column to sort by. Allowed values: `id`, `name`, `url`, `support_url`, `support_email`, `support_phone`, `assets_count`, `licenses_count`, `consumables_count`, `accessories_count`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="deleted" type="string">
+  Set to "true" to show only deleted manufacturers
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total number of manufacturers
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  Array of manufacturer objects
+  <Expandable title="Manufacturer Object">
+    <ResponseField name="id" type="integer">
+      Manufacturer ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Manufacturer name
+    </ResponseField>
+    <ResponseField name="url" type="string">
+      Manufacturer website URL
+    </ResponseField>
+    <ResponseField name="support_url" type="string">
+      Support website URL
+    </ResponseField>
+    <ResponseField name="warranty_lookup_url" type="string">
+      Warranty lookup URL
+    </ResponseField>
+    <ResponseField name="support_email" type="string">
+      Support email address
+    </ResponseField>
+    <ResponseField name="support_phone" type="string">
+      Support phone number
+    </ResponseField>
+    <ResponseField name="assets_count" type="integer">
+      Number of assets from this manufacturer
+    </ResponseField>
+    <ResponseField name="licenses_count" type="integer">
+      Number of licenses from this manufacturer
+    </ResponseField>
+    <ResponseField name="consumables_count" type="integer">
+      Number of consumables from this manufacturer
+    </ResponseField>
+    <ResponseField name="accessories_count" type="integer">
+      Number of accessories from this manufacturer
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      Manufacturer notes
+    </ResponseField>
+    <ResponseField name="image" type="string">
+      Manufacturer logo URL
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Get Manufacturer by ID
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/manufacturers/{manufacturer_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="manufacturer_id" type="integer" required>
+  The manufacturer ID
+</ParamField>
+
+## Create Manufacturer
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/manufacturers" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Dell Inc.",
+    "url": "https://www.dell.com",
+    "support_url": "https://www.dell.com/support",
+    "support_email": "support@dell.com",
+    "support_phone": "1-800-624-9896"
+  }'
+```
+</CodeGroup>
+
+<ParamField body="name" type="string" required>
+  Manufacturer name
+</ParamField>
+
+<ParamField body="url" type="string">
+  Manufacturer website URL
+</ParamField>
+
+<ParamField body="support_url" type="string">
+  Support website URL
+</ParamField>
+
+<ParamField body="warranty_lookup_url" type="string">
+  Warranty lookup URL (use {serial} as placeholder for serial number)
+</ParamField>
+
+<ParamField body="support_email" type="string">
+  Support email address
+</ParamField>
+
+<ParamField body="support_phone" type="string">
+  Support phone number
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Manufacturer notes
+</ParamField>
+
+<ParamField body="image" type="string">
+  Base64 encoded image or image file
+</ParamField>
+
+## Update Manufacturer
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://your-domain.com/api/v1/manufacturers/{manufacturer_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Manufacturer Name",
+    "support_phone": "1-800-555-0199"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="manufacturer_id" type="integer" required>
+  The manufacturer ID
+</ParamField>
+
+## Delete Manufacturer
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://your-domain.com/api/v1/manufacturers/{manufacturer_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="manufacturer_id" type="integer" required>
+  The manufacturer ID
+</ParamField>
+
+<Note>A manufacturer cannot be deleted if it has associated assets, licenses, accessories, consumables, or components. You must first reassign or delete those items.</Note>
+
+## Restore Deleted Manufacturer
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/manufacturers/{manufacturer_id}/restore" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="manufacturer_id" type="integer" required>
+  The deleted manufacturer ID
+</ParamField>
+
+Restores a soft-deleted manufacturer.

@@ -1,0 +1,213 @@
+---
+title: Assets
+description: Manage your organization's hardware assets with comprehensive tracking, check-in/check-out workflows, and lifecycle management
+icon: laptop
+---
+
+## Overview
+
+Assets (also called "Hardware" in Snipe-IT) are the physical items your organization tracks - laptops, monitors, phones, servers, and any other equipment. Each asset has a unique asset tag and can be assigned to users, locations, or other assets.
+
+## Key Features
+
+### Asset Tracking
+
+Every asset includes:
+- **Unique Asset Tag** - Required identifier for each asset
+- **Serial Number** - Optional or required based on model settings
+- **Model Information** - Links to manufacturer, category, and specifications
+- **Status Label** - Deployable, Pending, Archived, or custom statuses
+- **Purchase Details** - Cost, date, supplier, and order number
+- **Warranty Information** - Warranty months and expiration tracking
+- **Location Tracking** - Current and default (RTD) locations
+
+### Check-Out Workflows
+
+<Steps>
+  <Step title="Select Asset">
+    Navigate to the asset you want to check out. The asset must have a "Deployable" status.
+  </Step>
+  
+  <Step title="Choose Recipient">
+    Check out to a:
+    - **User** - Assign to an employee
+    - **Asset** - Assign to another asset (e.g., a monitor to a laptop)
+    - **Location** - Assign to a physical location
+  </Step>
+  
+  <Step title="Set Details">
+    Optionally specify:
+    - Expected check-in date
+    - Custom checkout note
+    - Override location
+  </Step>
+  
+  <Step title="Confirm Checkout">
+    The system automatically:
+    - Updates asset location
+    - Creates audit log entry
+    - Sends email notification (if configured)
+    - Requests user acceptance (if required)
+  </Step>
+</Steps>
+
+### Check-In Process
+
+When checking in an asset:
+1. Asset status can be changed if needed
+2. Location returns to default RTD location
+3. Custom fields can be updated during check-in (if configured)
+4. Audit log records the check-in event
+5. Email notifications sent (if enabled)
+
+<Note>
+Assets checked out to other assets cannot be directly checked in - you must first check in the parent asset.
+</Note>
+
+## Asset Statuses
+
+| Status Type | Description | Can Check Out? |
+|-------------|-------------|----------------|
+| **Deployable** | Asset is available and ready to use | Yes |
+| **Pending** | Asset is being prepared or processed | No |
+| **Undeployable** | Asset needs repair or is unavailable | No |
+| **Archived** | Asset is retired from service | No |
+
+## Custom Fields
+
+Assets support custom fields through fieldsets attached to asset models:
+
+<AccordionGroup>
+  <Accordion title="Custom Field Types">
+    - Text fields (encrypted or plain)
+    - Textarea
+    - Checkboxes
+    - Date fields
+    - Dropdown lists
+  </Accordion>
+  
+  <Accordion title="Checkout/Checkin Fields">
+    Custom fields can be configured to:
+    - Display during checkout
+    - Display during check-in
+    - Require validation
+    - Support encryption for sensitive data
+  </Accordion>
+</AccordionGroup>
+
+## Auditing
+
+Snipe-IT supports scheduled asset audits:
+
+- **Next Audit Date** - When the asset is due for audit
+- **Last Audit Date** - When it was last audited
+- **Audit Interval** - Configured globally in settings
+- **Overdue Alerts** - Email notifications for overdue audits
+
+<Tip>
+The audit feature helps ensure asset accuracy and compliance with organizational policies.
+</Tip>
+
+## Asset Lifecycle
+
+### End of Life (EOL) Tracking
+
+Assets automatically calculate EOL based on:
+- Model EOL months + purchase date
+- Manual override with explicit EOL date
+- Alerts for assets approaching EOL
+
+### Depreciation
+
+When a depreciation model is assigned:
+- Current value calculated automatically
+- Based on purchase cost and date
+- Multiple depreciation methods supported
+
+## Bulk Operations
+
+### Creating Multiple Assets
+
+<Steps>
+  <Step title="Enter Asset Count">
+    Specify how many assets to create in one batch
+  </Step>
+  
+  <Step title="Provide Asset Tags">
+    Enter unique asset tags for each item (can auto-increment)
+  </Step>
+  
+  <Step title="Enter Serial Numbers">
+    Add serial numbers (required if model requires them)
+  </Step>
+  
+  <Step title="Complete Shared Fields">
+    All assets share: model, purchase date, supplier, status, etc.
+  </Step>
+</Steps>
+
+## Components
+
+Assets can have components assigned to them:
+- RAM modules
+- Hard drives
+- Network cards
+- Any tracked component
+
+Components maintain their own quantity and can be assigned to multiple assets.
+
+## Requestable Assets
+
+Mark assets as "requestable" to allow users to:
+- Browse available requestable assets
+- Submit requests for checkout
+- Admins approve/deny requests
+- Automatic checkout upon approval
+
+<Warning>
+Only assets with "Deployable" status can be marked as requestable.
+</Warning>
+
+## Reporting
+
+Generate comprehensive reports on:
+- Assets by status, location, or model
+- Checked out assets and their assignees
+- Asset value and depreciation
+- Warranty expirations
+- EOL approaching assets
+- Audit due/overdue assets
+
+## BYOD (Bring Your Own Device)
+
+Mark personal devices with the BYOD flag to:
+- Distinguish company-owned vs. personal assets
+- Apply different policies
+- Track without full ownership
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Asset Tagging" icon="tag">
+    Use a consistent asset tag format. Enable auto-increment with zero-fill for clean numbering (e.g., ASSET-00001).
+  </Card>
+  
+  <Card title="Default Locations" icon="location-dot">
+    Always set RTD (Ready to Deploy) locations so assets return to the correct place when checked in.
+  </Card>
+  
+  <Card title="Custom Fields" icon="list-check">
+    Create fieldsets for different asset types to capture model-specific information.
+  </Card>
+  
+  <Card title="Regular Audits" icon="clipboard-check">
+    Schedule regular audits to maintain accurate asset records and locations.
+  </Card>
+</CardGroup>
+
+## Related Features
+
+- [Maintenance](/features/maintenance) - Track repairs and service history
+- [Components](/features/components) - Assign parts to assets
+- [Locations](/features/locations) - Organize assets by physical location
+- [Users](/features/users) - Assign assets to people

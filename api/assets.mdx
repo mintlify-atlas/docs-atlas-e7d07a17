@@ -1,0 +1,407 @@
+---
+title: 'Assets'
+description: 'Manage hardware assets via the API'
+---
+
+The Assets API (also referred to as "hardware" in routes) allows you to manage hardware assets in Snipe-IT.
+
+## List Assets
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/hardware" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter results
+</ParamField>
+
+<ParamField query="sort" type="string" default="created_at">
+  Column to sort by. Allowed values: `id`, `name`, `asset_tag`, `serial`, `model`, `model_number`, `last_checkout`, `category`, `manufacturer`, `notes`, `expected_checkin`, `order_number`, `company`, `location`, `purchase_date`, `purchase_cost`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status: `Deleted`, `Pending`, `RTD`, `Undeployable`, `Archived`, `Requestable`, `Deployed`
+</ParamField>
+
+<ParamField query="model_id" type="integer">
+  Filter by model ID
+</ParamField>
+
+<ParamField query="category_id" type="integer">
+  Filter by category ID
+</ParamField>
+
+<ParamField query="manufacturer_id" type="integer">
+  Filter by manufacturer ID
+</ParamField>
+
+<ParamField query="company_id" type="integer">
+  Filter by company ID
+</ParamField>
+
+<ParamField query="location_id" type="integer">
+  Filter by location ID
+</ParamField>
+
+<ParamField query="status_id" type="integer">
+  Filter by status label ID
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total number of assets
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  Array of asset objects
+  <Expandable title="Asset Object">
+    <ResponseField name="id" type="integer">
+      Asset ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Asset name
+    </ResponseField>
+    <ResponseField name="asset_tag" type="string">
+      Asset tag
+    </ResponseField>
+    <ResponseField name="serial" type="string">
+      Serial number
+    </ResponseField>
+    <ResponseField name="model" type="object">
+      Asset model information
+    </ResponseField>
+    <ResponseField name="model_number" type="string">
+      Model number
+    </ResponseField>
+    <ResponseField name="status_label" type="object">
+      Status label information
+    </ResponseField>
+    <ResponseField name="category" type="object">
+      Category information
+    </ResponseField>
+    <ResponseField name="manufacturer" type="object">
+      Manufacturer information
+    </ResponseField>
+    <ResponseField name="supplier" type="object">
+      Supplier information
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      Asset notes
+    </ResponseField>
+    <ResponseField name="order_number" type="string">
+      Order number
+    </ResponseField>
+    <ResponseField name="company" type="object">
+      Company information
+    </ResponseField>
+    <ResponseField name="location" type="object">
+      Current location
+    </ResponseField>
+    <ResponseField name="rtd_location" type="object">
+      Default location (Return to Default)
+    </ResponseField>
+    <ResponseField name="assigned_to" type="object">
+      User or asset this is assigned to
+    </ResponseField>
+    <ResponseField name="warranty_months" type="integer">
+      Warranty duration in months
+    </ResponseField>
+    <ResponseField name="purchase_date" type="string">
+      Purchase date
+    </ResponseField>
+    <ResponseField name="purchase_cost" type="string">
+      Purchase cost
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      Creation timestamp
+    </ResponseField>
+    <ResponseField name="updated_at" type="string">
+      Last update timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Get Asset by ID
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/hardware/{asset_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="asset_id" type="integer" required>
+  The asset ID
+</ParamField>
+
+## Get Asset by Tag
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/hardware/bytag/{asset_tag}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="asset_tag" type="string" required>
+  The asset tag
+</ParamField>
+
+## Get Asset by Serial
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/hardware/byserial/{serial}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="serial" type="string" required>
+  The serial number
+</ParamField>
+
+## Create Asset
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/hardware" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "asset_tag": "LAP-00123",
+    "model_id": 1,
+    "status_id": 2,
+    "name": "Employee Laptop"
+  }'
+```
+</CodeGroup>
+
+<ParamField body="asset_tag" type="string" required>
+  Unique asset tag
+</ParamField>
+
+<ParamField body="model_id" type="integer" required>
+  Asset model ID
+</ParamField>
+
+<ParamField body="status_id" type="integer" required>
+  Status label ID
+</ParamField>
+
+<ParamField body="name" type="string">
+  Asset name
+</ParamField>
+
+<ParamField body="serial" type="string">
+  Serial number
+</ParamField>
+
+<ParamField body="purchase_date" type="string">
+  Purchase date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="purchase_cost" type="number">
+  Purchase cost
+</ParamField>
+
+<ParamField body="order_number" type="string">
+  Order/PO number
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Asset notes
+</ParamField>
+
+<ParamField body="rtd_location_id" type="integer">
+  Default location ID
+</ParamField>
+
+<ParamField body="warranty_months" type="integer">
+  Warranty duration in months
+</ParamField>
+
+<ParamField body="supplier_id" type="integer">
+  Supplier ID
+</ParamField>
+
+<ParamField body="company_id" type="integer">
+  Company ID
+</ParamField>
+
+## Update Asset
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://your-domain.com/api/v1/hardware/{asset_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Asset Name",
+    "status_id": 2
+  }'
+```
+</CodeGroup>
+
+<ParamField path="asset_id" type="integer" required>
+  The asset ID
+</ParamField>
+
+## Delete Asset
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://your-domain.com/api/v1/hardware/{asset_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="asset_id" type="integer" required>
+  The asset ID
+</ParamField>
+
+## Checkout Asset
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/hardware/{asset_id}/checkout" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "assigned_user": 123,
+    "checkout_at": "2024-01-15",
+    "note": "Assigned to employee"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="asset_id" type="integer" required>
+  The asset ID
+</ParamField>
+
+<ParamField body="assigned_user" type="integer">
+  User ID to checkout to (use one of assigned_user, assigned_asset, or assigned_location)
+</ParamField>
+
+<ParamField body="assigned_asset" type="integer">
+  Asset ID to checkout to
+</ParamField>
+
+<ParamField body="assigned_location" type="integer">
+  Location ID to checkout to
+</ParamField>
+
+<ParamField body="checkout_at" type="string">
+  Checkout date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="expected_checkin" type="string">
+  Expected checkin date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="note" type="string">
+  Checkout note
+</ParamField>
+
+## Checkin Asset
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/hardware/{asset_id}/checkin" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "note": "Returned in good condition",
+    "location_id": 5
+  }'
+```
+</CodeGroup>
+
+<ParamField path="asset_id" type="integer" required>
+  The asset ID
+</ParamField>
+
+<ParamField body="note" type="string">
+  Checkin note
+</ParamField>
+
+<ParamField body="location_id" type="integer">
+  Location to check in to
+</ParamField>
+
+## Audit Asset
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/hardware/{asset_id}/audit" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "location_id": 5,
+    "note": "Annual audit"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="asset_id" type="integer" required>
+  The asset ID
+</ParamField>
+
+<ParamField body="location_id" type="integer">
+  Current location
+</ParamField>
+
+<ParamField body="note" type="string">
+  Audit note
+</ParamField>
+
+<ParamField body="next_audit_date" type="string">
+  Next audit date (YYYY-MM-DD)
+</ParamField>
+
+## Get Assets Due for Audit
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/hardware/audits/due" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+Returns assets that are due for audit based on audit interval settings.
+
+## Get Overdue Audits
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/hardware/audits/overdue" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+Returns assets with overdue audits.

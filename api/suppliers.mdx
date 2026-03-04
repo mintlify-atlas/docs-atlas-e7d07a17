@@ -1,0 +1,229 @@
+---
+title: 'Suppliers'
+description: 'Manage suppliers via the API'
+---
+
+The Suppliers API allows you to manage vendors and suppliers from whom you purchase equipment and supplies.
+
+## List Suppliers
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/suppliers" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter results
+</ParamField>
+
+<ParamField query="sort" type="string" default="created_at">
+  Column to sort by. Allowed values: `id`, `name`, `address`, `city`, `state`, `country`, `zip`, `phone`, `fax`, `email`, `contact`, `assets_count`, `licenses_count`, `accessories_count`, `consumables_count`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total number of suppliers
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  Array of supplier objects
+  <Expandable title="Supplier Object">
+    <ResponseField name="id" type="integer">
+      Supplier ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Supplier name
+    </ResponseField>
+    <ResponseField name="address" type="string">
+      Street address
+    </ResponseField>
+    <ResponseField name="address2" type="string">
+      Address line 2
+    </ResponseField>
+    <ResponseField name="city" type="string">
+      City
+    </ResponseField>
+    <ResponseField name="state" type="string">
+      State/province
+    </ResponseField>
+    <ResponseField name="country" type="string">
+      Country
+    </ResponseField>
+    <ResponseField name="zip" type="string">
+      ZIP/postal code
+    </ResponseField>
+    <ResponseField name="phone" type="string">
+      Phone number
+    </ResponseField>
+    <ResponseField name="fax" type="string">
+      Fax number
+    </ResponseField>
+    <ResponseField name="email" type="string">
+      Email address
+    </ResponseField>
+    <ResponseField name="contact" type="string">
+      Contact person name
+    </ResponseField>
+    <ResponseField name="url" type="string">
+      Website URL
+    </ResponseField>
+    <ResponseField name="assets_count" type="integer">
+      Number of assets from this supplier
+    </ResponseField>
+    <ResponseField name="licenses_count" type="integer">
+      Number of licenses from this supplier
+    </ResponseField>
+    <ResponseField name="accessories_count" type="integer">
+      Number of accessories from this supplier
+    </ResponseField>
+    <ResponseField name="consumables_count" type="integer">
+      Number of consumables from this supplier
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      Supplier notes
+    </ResponseField>
+    <ResponseField name="image" type="string">
+      Supplier logo URL
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Get Supplier by ID
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/suppliers/{supplier_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="supplier_id" type="integer" required>
+  The supplier ID
+</ParamField>
+
+## Create Supplier
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/suppliers" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Tech Suppliers Inc.",
+    "address": "456 Commerce Blvd",
+    "city": "San Francisco",
+    "state": "CA",
+    "country": "US",
+    "zip": "94102",
+    "phone": "415-555-0100",
+    "email": "sales@techsuppliers.com"
+  }'
+```
+</CodeGroup>
+
+<ParamField body="name" type="string" required>
+  Supplier name
+</ParamField>
+
+<ParamField body="address" type="string">
+  Street address
+</ParamField>
+
+<ParamField body="address2" type="string">
+  Address line 2
+</ParamField>
+
+<ParamField body="city" type="string">
+  City
+</ParamField>
+
+<ParamField body="state" type="string">
+  State/province
+</ParamField>
+
+<ParamField body="country" type="string">
+  Country
+</ParamField>
+
+<ParamField body="zip" type="string">
+  ZIP/postal code
+</ParamField>
+
+<ParamField body="phone" type="string">
+  Phone number
+</ParamField>
+
+<ParamField body="fax" type="string">
+  Fax number
+</ParamField>
+
+<ParamField body="email" type="string">
+  Email address
+</ParamField>
+
+<ParamField body="contact" type="string">
+  Contact person name
+</ParamField>
+
+<ParamField body="url" type="string">
+  Website URL
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Supplier notes
+</ParamField>
+
+<ParamField body="image" type="string">
+  Base64 encoded image or image file
+</ParamField>
+
+## Update Supplier
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://your-domain.com/api/v1/suppliers/{supplier_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Supplier Name",
+    "phone": "415-555-0199"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="supplier_id" type="integer" required>
+  The supplier ID
+</ParamField>
+
+## Delete Supplier
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://your-domain.com/api/v1/suppliers/{supplier_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="supplier_id" type="integer" required>
+  The supplier ID
+</ParamField>
+
+<Note>A supplier cannot be deleted if it has associated assets, licenses, accessories, consumables, or components. You must first reassign or delete those items.</Note>

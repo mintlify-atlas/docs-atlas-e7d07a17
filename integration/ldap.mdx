@@ -1,0 +1,357 @@
+---
+title: "LDAP/Active Directory Integration"
+description: "Sync users and authenticate against LDAP or Active Directory"
+icon: "network-wired"
+---
+
+Snipe-IT supports LDAP and Active Directory integration for user authentication and synchronization. This allows you to:
+
+- Authenticate users against your corporate directory
+- Automatically import user information
+- Keep user data synchronized
+- Leverage existing directory groups
+
+## Prerequisites
+
+<Check>
+Before configuring LDAP, ensure you have:
+- LDAP/AD server hostname or IP address
+- LDAP bind user credentials (service account)
+- Base DN for your directory
+- Network connectivity from Snipe-IT to your LDAP server
+- PHP LDAP extension installed (`php-ldap`)
+</Check>
+
+## Configuration
+
+### 1. Enable LDAP
+
+Navigate to **Admin** > **Settings** > **LDAP** in the Snipe-IT interface.
+
+### 2. Basic LDAP Settings
+
+<Steps>
+<Step title="Server Configuration">
+Configure your LDAP server connection:
+
+- **LDAP Server**: Hostname or IP (e.g., `ldap.example.com` or `192.168.1.10`)
+- **LDAP Port**: Usually `389` for LDAP or `636` for LDAPS
+- **LDAP Version**: Typically `3`
+- **Base DN**: Your directory base (e.g., `dc=example,dc=com`)
+</Step>
+
+<Step title="Bind Credentials">
+Provide credentials for a service account with read access to your directory:
+
+- **LDAP Bind Username**: Full DN (e.g., `cn=snipeit,ou=service,dc=example,dc=com`)
+- **LDAP Bind Password**: Password for the bind user
+</Step>
+
+<Step title="User Filter">
+Define which users to import:
+
+- **LDAP Filter**: Filter query (e.g., `(&(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))`)
+</Step>
+</Steps>
+
+### Environment Variables
+
+You can also configure LDAP settings via environment variables in your `.env` file:
+
+```bash .env
+# LDAP Server Configuration
+LDAP_ENABLED=true
+LDAP_SERVER=ldap.example.com
+LDAP_PORT=389
+LDAP_VERSION=3
+
+# LDAP Bind Credentials
+LDAP_UNAME="cn=snipeit,ou=service,dc=example,dc=com"
+LDAP_PWORD="your_bind_password"
+
+# LDAP Search Base
+LDAP_BASEDN="dc=example,dc=com"
+
+# LDAP User Filter
+LDAP_FILTER="(&(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))"
+
+# LDAP Field Mappings
+LDAP_USERNAME_FIELD=samaccountname
+LDAP_FNAME_FIELD=givenname
+LDAP_LNAME_FIELD=sn
+LDAP_EMAIL=mail
+LDAP_EMP_NUM=employeenumber
+LDAP_PHONE_FIELD=telephonenumber
+LDAP_JOBTITLE=title
+LDAP_DEPT=department
+LDAP_MANAGER=manager
+LDAP_COUNTRY=c
+LDAP_LOCATION=physicaldeliveryofficename
+
+# LDAP Security Settings
+LDAP_TLS=false
+LDAP_SERVER_CERT_IGNORE=false
+
+# LDAP Password Sync
+LDAP_PW_SYNC=false
+
+# Memory and Time Limits
+LDAP_MEM_LIM=500M
+LDAP_TIME_LIM=600
+```
+
+## Field Mapping
+
+Map LDAP attributes to Snipe-IT user fields:
+
+| Snipe-IT Field | Common AD Attribute | Common LDAP Attribute |
+|----------------|---------------------|----------------------|
+| Username | `samaccountname` | `uid` |
+| First Name | `givenname` | `givenName` |
+| Last Name | `sn` | `sn` |
+| Email | `mail` | `mail` |
+| Employee Number | `employeenumber` | `employeeNumber` |
+| Phone | `telephonenumber` | `telephoneNumber` |
+| Job Title | `title` | `title` |
+| Department | `department` | `ou` |
+| Manager | `manager` | `manager` |
+| Country | `c` | `c` |
+| Location | `physicaldeliveryofficename` | `l` |
+
+<Info>
+The exact attribute names may vary depending on your LDAP schema. Consult your directory administrator for the correct attribute names.
+</Info>
+
+## Active Directory Examples
+
+### Standard Active Directory Configuration
+
+```bash .env
+LDAP_ENABLED=true
+LDAP_SERVER=dc01.corp.example.com
+LDAP_PORT=389
+LDAP_VERSION=3
+LDAP_BASEDN="dc=corp,dc=example,dc=com"
+LDAP_UNAME="cn=Snipe-IT Service,ou=Service Accounts,dc=corp,dc=example,dc=com"
+LDAP_PWORD="SecurePassword123!"
+LDAP_USERNAME_FIELD=samaccountname
+LDAP_FNAME_FIELD=givenname
+LDAP_LNAME_FIELD=sn
+LDAP_EMAIL=mail
+
+# Only import enabled users
+LDAP_FILTER="(&(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))"
+```
+
+### Active Directory with LDAPS (Secure)
+
+```bash .env
+LDAP_ENABLED=true
+LDAP_SERVER=dc01.corp.example.com
+LDAP_PORT=636
+LDAP_VERSION=3
+LDAP_TLS=true
+LDAP_SERVER_CERT_IGNORE=false
+LDAP_BASEDN="dc=corp,dc=example,dc=com"
+LDAP_UNAME="cn=Snipe-IT Service,ou=Service Accounts,dc=corp,dc=example,dc=com"
+LDAP_PWORD="SecurePassword123!"
+LDAP_USERNAME_FIELD=samaccountname
+```
+
+### Active Directory - Specific OU Only
+
+```bash .env
+LDAP_ENABLED=true
+LDAP_SERVER=dc01.corp.example.com
+LDAP_PORT=389
+LDAP_BASEDN="ou=Employees,dc=corp,dc=example,dc=com"
+LDAP_FILTER="(&(objectClass=user)(memberOf=CN=IT Department,ou=Groups,dc=corp,dc=example,dc=com))"
+```
+
+## OpenLDAP Examples
+
+### Standard OpenLDAP Configuration
+
+```bash .env
+LDAP_ENABLED=true
+LDAP_SERVER=ldap.example.com
+LDAP_PORT=389
+LDAP_VERSION=3
+LDAP_BASEDN="dc=example,dc=com"
+LDAP_UNAME="cn=admin,dc=example,dc=com"
+LDAP_PWORD="admin_password"
+LDAP_USERNAME_FIELD=uid
+LDAP_FNAME_FIELD=givenName
+LDAP_LNAME_FIELD=sn
+LDAP_EMAIL=mail
+LDAP_FILTER="(objectClass=inetOrgPerson)"
+```
+
+## LDAP Authentication
+
+When LDAP authentication is enabled, Snipe-IT will:
+
+1. Check if the username exists in the local database
+2. If found and LDAP is enabled, authenticate against LDAP
+3. If authentication succeeds, update the user's information from LDAP
+4. If the user doesn't exist locally, they must be imported via LDAP sync first
+
+### Authentication Filter
+
+You can specify an additional authentication filter to restrict which LDAP users can log in:
+
+```bash .env
+# Only allow users in specific group to authenticate
+LDAP_AUTH_FILTER_QUERY="(memberOf=CN=Snipe-IT Users,ou=Groups,dc=corp,dc=example,dc=com)"
+```
+
+## Importing Users
+
+### Manual Import via Web Interface
+
+1. Navigate to **Admin** > **Users**
+2. Click **LDAP Sync** button
+3. Optionally select a default location for imported users
+4. Click **Synchronize**
+5. Review the import summary
+
+### Command Line Import
+
+You can import users via the command line:
+
+```bash
+# Import all LDAP users
+php artisan snipeit:ldap-sync
+
+# Import users to a specific location
+php artisan snipeit:ldap-sync --location_id=1
+
+# Show JSON summary
+php artisan snipeit:ldap-sync --json_summary
+```
+
+### Scheduled LDAP Sync
+
+To automatically sync users on a schedule, add a cron job:
+
+```bash crontab
+# Sync LDAP users daily at 2 AM
+0 2 * * * cd /path/to/snipe-it && php artisan snipeit:ldap-sync
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+<Accordion title="Test LDAP Connection" icon="plug">
+Use the built-in LDAP test tool:
+
+1. Navigate to **Admin** > **Settings** > **LDAP**
+2. Click **Test LDAP Connection**
+3. Review the test results
+
+You can also test via API:
+
+```bash
+curl -X GET https://your-snipe-it-instance.com/api/v1/settings/ldaptest \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+</Accordion>
+
+<Accordion title="Common Connection Issues" icon="triangle-exclamation">
+**Cannot connect to LDAP server:**
+- Verify network connectivity: `telnet ldap.example.com 389`
+- Check firewall rules
+- Ensure correct hostname/IP and port
+- Verify LDAP service is running
+
+**Certificate verification failed:**
+- For testing, temporarily set `LDAP_SERVER_CERT_IGNORE=true`
+- For production, install proper CA certificates
+- Verify certificate CN matches server hostname
+</Accordion>
+
+<Accordion title="Authentication Issues" icon="key">
+**Users cannot log in:**
+- Verify users have been imported first (LDAP sync)
+- Check the authentication filter is not too restrictive
+- Verify bind user credentials are correct
+- Check user's account is enabled in AD/LDAP
+- Review Snipe-IT logs: `storage/logs/laravel.log`
+
+**Wrong user information:**
+- Verify field mappings match your LDAP schema
+- Re-run LDAP sync to update user data
+</Accordion>
+
+<Accordion title="Import Issues" icon="users">
+**No users imported:**
+- Verify LDAP filter syntax
+- Check base DN is correct
+- Ensure bind user has read permissions
+- Review error messages in web interface or command output
+
+**Duplicate users:**
+- Check if users exist with different usernames
+- Verify username field mapping is correct
+- Snipe-IT matches on username field
+</Accordion>
+</AccordionGroup>
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+<Card title="Use LDAPS" icon="lock">
+Always use LDAPS (port 636) in production to encrypt credentials in transit.
+</Card>
+
+<Card title="Dedicated Service Account" icon="user-shield">
+Create a dedicated LDAP service account with read-only permissions for Snipe-IT.
+</Card>
+
+<Card title="Restrict Base DN" icon="filter">
+Use the most specific base DN possible to limit the directory scope.
+</Card>
+
+<Card title="Filter Carefully" icon="funnel">
+Use LDAP filters to import only necessary users and exclude disabled accounts.
+</Card>
+</CardGroup>
+
+## Advanced Configuration
+
+### Client TLS Certificates
+
+If your LDAP server requires client certificates:
+
+```bash .env
+LDAP_CLIENT_TLS_CERT=/path/to/client.crt
+LDAP_CLIENT_TLS_KEY=/path/to/client.key
+```
+
+### Default Group for LDAP Users
+
+Assign imported LDAP users to a specific Snipe-IT group:
+
+```bash .env
+LDAP_DEFAULT_GROUP=3
+```
+
+### Password Synchronization
+
+Allow LDAP users to change their Snipe-IT password (not recommended if using LDAP auth):
+
+```bash .env
+LDAP_PW_SYNC=false
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="SAML SSO" icon="key" href="/integration/saml">
+  Configure enterprise single sign-on
+</Card>
+
+<Card title="User Management" icon="users" href="/features/users">
+  Learn about user permissions and groups
+</Card>
+</CardGroup>

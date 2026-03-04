@@ -1,97 +1,185 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: Snipe-IT Documentation
+description: Open source IT asset and license management system
 ---
 
-## Setting up
+<div className="relative w-full overflow-hidden bg-gradient-to-br from-[#6a1b6a] to-[#8d2e8b] dark:from-[#4a0e4a] dark:to-[#6a1b6a] py-20">
+  <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div className="text-white">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+          Snipe-IT Documentation
+        </h1>
+        <p className="text-lg sm:text-xl mb-8 max-w-2xl text-white/90">
+          Everything you need to deploy, configure, and manage your IT assets with Snipe-IT — the leading open source asset management platform.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+          <a 
+            href="/quickstart" 
+            className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-black bg-[#fdb913] hover:bg-[#f7b600] transition-colors rounded no-underline"
+          >
+            Get Started
+          </a>
+          <a 
+            href="/api/authentication" 
+            className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white border-2 border-white/30 bg-white/10 hover:bg-white/20 hover:border-white/50 transition-colors rounded no-underline"
+          >
+            Explore API
+          </a>
+        </div>
+      </div>
+      <div className="hidden lg:block">
+        <div className="bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+          <div className="space-y-4">
+            <div className="h-3 bg-white/30 rounded w-3/4"></div>
+            <div className="h-3 bg-white/20 rounded w-full"></div>
+            <div className="h-3 bg-white/20 rounded w-5/6"></div>
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              <div className="h-20 bg-white/20 rounded-lg"></div>
+              <div className="h-20 bg-white/20 rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-Get your documentation site up and running in minutes.
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Quick Start
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Get Snipe-IT up and running in minutes
+  </p>
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+  <Steps>
+    <Step title="Install Snipe-IT">
+      Deploy Snipe-IT using Docker, manual installation, or your preferred hosting method. See the [installation guide](/installation) for detailed instructions.
+      
+      ```bash Docker
+      docker run -d -p 80:80 --name snipe-it \
+        -e APP_URL=http://localhost \
+        -e MYSQL_ROOT_PASSWORD=secret \
+        snipe/snipe-it:latest
+      ```
+    </Step>
 
-## Make it yours
+    <Step title="Complete Initial Setup">
+      Access your Snipe-IT instance in a browser and complete the web-based setup wizard. You'll configure your database connection, create an admin account, and set basic preferences.
+      
+      <Note>
+        The default admin credentials should be changed immediately after first login for security.
+      </Note>
+    </Step>
 
-Design a docs site that looks great and empowers your users.
+    <Step title="Add Your First Assets">
+      Navigate to **Assets** → **Create New** to add hardware assets to your inventory. Define categories, manufacturers, and custom fields to organize your assets effectively.
+    </Step>
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+    <Step title="Start Managing">
+      Check assets in and out to users, set up maintenance schedules, track software licenses, and generate reports. Explore the [core features](/features/assets) to unlock the full potential of Snipe-IT.
+    </Step>
+  </Steps>
+</div>
 
-## Create beautiful pages
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Explore Features
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Discover what you can do with Snipe-IT
+  </p>
 
-Everything you need to create world-class documentation.
+  <CardGroup cols={2}>
+    <Card title="Asset Management" icon="laptop" href="/features/assets">
+      Track hardware assets with serial numbers, purchase dates, depreciation, and custom fields
+    </Card>
+    <Card title="License Tracking" icon="key" href="/features/licenses">
+      Manage software licenses, seats, and compliance across your organization
+    </Card>
+    <Card title="Check-In/Check-Out" icon="right-left" href="/features/assets">
+      Assign assets to users and locations with a complete audit trail
+    </Card>
+    <Card title="Maintenance Scheduling" icon="wrench" href="/features/maintenance">
+      Schedule and track maintenance for your IT assets
+    </Card>
+    <Card title="Custom Fields" icon="table-columns" href="/admin/custom-fields">
+      Create custom fields to capture asset data unique to your organization
+    </Card>
+    <Card title="Multi-Company Support" icon="building" href="/admin/companies">
+      Manage assets across multiple companies or departments
+    </Card>
+    <Card title="RESTful API" icon="code" href="/api/authentication">
+      Integrate with third-party tools using our comprehensive REST API
+    </Card>
+    <Card title="Reporting" icon="chart-bar" href="/features/assets">
+      Generate detailed reports on assets, licenses, users, and more
+    </Card>
+  </CardGroup>
+</div>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Integration & Extensibility
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Connect Snipe-IT with your existing tools and workflows
+  </p>
 
-## Need inspiration?
+  <CardGroup cols={2}>
+    <Card title="REST API" icon="plug" href="/integration/api-overview">
+      Full-featured REST API for automation and integrations
+    </Card>
+    <Card title="LDAP/Active Directory" icon="users" href="/integration/ldap">
+      Sync users and authentication with your directory service
+    </Card>
+    <Card title="SAML Single Sign-On" icon="shield-halved" href="/integration/saml">
+      Enable SSO with SAML 2.0 identity providers
+    </Card>
+    <Card title="Webhooks" icon="webhook" href="/integration/webhooks">
+      Trigger actions in external systems when events occur
+    </Card>
+  </CardGroup>
+</div>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Community & Support
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Get help and connect with the Snipe-IT community
+  </p>
+
+  <CardGroup cols={2}>
+    <Card title="Discord Community" icon="discord" href="https://discord.gg/yZFtShAcKk">
+      Join thousands of Snipe-IT users in our active Discord server
+    </Card>
+    <Card title="GitHub Repository" icon="github" href="https://github.com/grokability/snipe-it">
+      Browse source code, report issues, and contribute to development
+    </Card>
+    <Card title="Grokstar Blog" icon="newspaper" href="https://grokstar.dev">
+      Read announcements, tutorials, and community stories
+    </Card>
+    <Card title="Live Demo" icon="circle-play" href="https://snipeitapp.com/demo/">
+      Try Snipe-IT without installation in our live demo environment
+    </Card>
+  </CardGroup>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <div className="bg-gradient-to-r from-[#6a1b6a] to-[#8d2e8b] dark:from-[#4a0e4a] dark:to-[#6a1b6a] rounded-2xl p-8 sm:p-12 text-center border border-gray-200 dark:border-[#27272a]">
+    <h2 className="text-2xl sm:text-3xl font-semibold text-white mb-4">
+      Ready to Get Started?
+    </h2>
+    <p className="text-base sm:text-lg text-white/90 mb-6 max-w-2xl mx-auto">
+      Install Snipe-IT today and take control of your IT asset management
+    </p>
+    <a 
+      href="/installation" 
+      className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-black bg-[#fdb913] hover:bg-[#f7b600] transition-colors rounded no-underline"
+    >
+      View Installation Guide
+    </a>
+  </div>
+</div>

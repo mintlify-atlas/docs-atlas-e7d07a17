@@ -1,0 +1,310 @@
+---
+title: Configuration
+description: Configure Snipe-IT environment settings, mail, database, and application options
+---
+
+Snipe-IT configuration is managed through environment variables in the `.env` file located in the root directory of your installation.
+
+## Basic Application Settings
+
+These settings control the core behavior of your Snipe-IT instance.
+
+### Required Settings
+
+```bash .env
+APP_ENV=production
+APP_DEBUG=false
+APP_KEY=base64:your-generated-key-here
+APP_URL=https://snipeit.yourcompany.com
+APP_TIMEZONE='UTC'
+APP_LOCALE='en-US'
+```
+
+<ParamField path="APP_ENV" type="string" default="production">
+  Application environment. Use `production` for live sites, `local` for development.
+</ParamField>
+
+<ParamField path="APP_DEBUG" type="boolean" default="false">
+  Enable debug mode. **Never enable this in production** as it exposes sensitive information.
+</ParamField>
+
+<ParamField path="APP_KEY" type="string" required>
+  Encryption key for securing sessions and encrypted data. Generate using `php artisan key:generate`.
+</ParamField>
+
+<ParamField path="APP_URL" type="string" required>
+  The full URL where your Snipe-IT installation is accessible (e.g., `https://assets.company.com`).
+</ParamField>
+
+<ParamField path="APP_TIMEZONE" type="string" default="UTC">
+  Default timezone for the application. Use PHP timezone identifiers like `America/New_York`.
+</ParamField>
+
+<ParamField path="APP_LOCALE" type="string" default="en-US">
+  Default locale for the application interface.
+</ParamField>
+
+<ParamField path="MAX_RESULTS" type="integer" default="500">
+  Maximum number of results to display per page in listings.
+</ParamField>
+
+### Performance Settings
+
+```bash .env
+CACHE_DRIVER=file
+QUEUE_DRIVER=sync
+CACHE_PREFIX=snipeit
+SESSION_DRIVER=file
+SESSION_LIFETIME=12000
+```
+
+<Info>
+  For production environments with multiple web servers, consider using Redis or Memcached for `CACHE_DRIVER` and `SESSION_DRIVER`.
+</Info>
+
+## Database Configuration
+
+Snipe-IT uses MySQL/MariaDB for data storage.
+
+### Basic Database Settings
+
+```bash .env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=snipeit
+DB_USERNAME=snipeit_user
+DB_PASSWORD=your-secure-password
+DB_PREFIX=
+DB_CHARSET=utf8mb4
+DB_COLLATION=utf8mb4_unicode_ci
+```
+
+<ParamField path="DB_CONNECTION" type="string" default="mysql">
+  Database driver. Currently only `mysql` is supported.
+</ParamField>
+
+<ParamField path="DB_SOCKET" type="string" default="null">
+  Use a Unix socket instead of TCP. Set to socket path or leave as `null` to use TCP.
+</ParamField>
+
+<ParamField path="DB_DUMP_PATH" type="string" default="/usr/bin">
+  Path to the `mysqldump` binary for database backups.
+</ParamField>
+
+### SSL Database Connections
+
+For secure connections to cloud databases (AWS RDS, Azure Database, Google Cloud SQL):
+
+```bash .env
+DB_SSL=true
+DB_SSL_IS_PAAS=true
+DB_SSL_CA_PATH=/path/to/ca-cert.pem
+```
+
+<ParamField path="DB_SSL" type="boolean" default="false">
+  Enable SSL/TLS encryption for database connections.
+</ParamField>
+
+<ParamField path="DB_SSL_IS_PAAS" type="boolean" default="false">
+  Set to `true` for cloud databases. Set to `false` for self-hosted databases with client certificates.
+</ParamField>
+
+<ParamField path="DB_SSL_CA_PATH" type="string">
+  Path to the CA certificate bundle. For AWS RDS, download from:
+  `https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem`
+</ParamField>
+
+<ParamField path="DB_SSL_KEY_PATH" type="string">
+  Path to client SSL key (required when `DB_SSL_IS_PAAS=false`).
+</ParamField>
+
+<ParamField path="DB_SSL_CERT_PATH" type="string">
+  Path to client SSL certificate (required when `DB_SSL_IS_PAAS=false`).
+</ParamField>
+
+<ParamField path="DB_SSL_VERIFY_SERVER" type="boolean">
+  Verify server certificate. Set to `false` for self-signed certificates (not recommended for production).
+</ParamField>
+
+## Mail Configuration
+
+Snipe-IT sends email notifications for checkouts, check-ins, and other events.
+
+### SMTP Settings
+
+```bash .env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@company.com
+MAIL_PASSWORD=your-app-password
+MAIL_FROM_ADDR=noreply@company.com
+MAIL_FROM_NAME='Asset Management'
+MAIL_REPLYTO_ADDR=support@company.com
+MAIL_REPLYTO_NAME='IT Support'
+MAIL_TLS_VERIFY_PEER=true
+```
+
+<ParamField path="MAIL_MAILER" type="string" default="smtp">
+  Mail driver. Use `smtp` for most configurations.
+</ParamField>
+
+<ParamField path="MAIL_HOST" type="string" required>
+  SMTP server hostname. Examples:
+  - Gmail: `smtp.gmail.com`
+  - Office 365: `smtp.office365.com`
+  - AWS SES: `email-smtp.us-west-2.amazonaws.com`
+</ParamField>
+
+<ParamField path="MAIL_PORT" type="integer" default="587">
+  SMTP port. Use `587` for TLS, `465` for SSL, or `25` for unencrypted (not recommended).
+</ParamField>
+
+<ParamField path="MAIL_TLS_VERIFY_PEER" type="boolean" default="true">
+  Verify TLS certificates. Set to `false` only for development or trusted internal servers.
+</ParamField>
+
+<ParamField path="MAIL_AUTO_EMBED_METHOD" type="string" default="attachment">
+  How to embed images in emails. Options: `attachment`, `base64`.
+</ParamField>
+
+<Warning>
+  The `MAIL_ENCRYPTION` setting is deprecated. Modern Symfony Mailer automatically uses TLS when available. If you need to force unencrypted connections due to certificate errors, use `MAIL_TLS_VERIFY_PEER=false`.
+</Warning>
+
+### Testing Mail Configuration
+
+Test your email settings from **Admin** > **Settings** > **Alerts** using the "Send Test Email" button.
+
+## File Storage
+
+Configure where uploaded files (logos, images, documents) are stored.
+
+### Local Storage
+
+```bash .env
+PRIVATE_FILESYSTEM_DISK=local
+PUBLIC_FILESYSTEM_DISK=local_public
+```
+
+### Amazon S3 Storage
+
+For cloud storage, configure separate S3 buckets for public and private files:
+
+```bash .env
+# Private files (licenses, encrypted documents)
+PRIVATE_FILESYSTEM_DISK=s3_private
+PRIVATE_AWS_ACCESS_KEY_ID=your-access-key
+PRIVATE_AWS_SECRET_ACCESS_KEY=your-secret-key
+PRIVATE_AWS_DEFAULT_REGION=us-west-2
+PRIVATE_AWS_BUCKET=snipeit-private
+
+# Public files (logos, public images)
+PUBLIC_FILESYSTEM_DISK=s3_public
+PUBLIC_AWS_ACCESS_KEY_ID=your-access-key
+PUBLIC_AWS_SECRET_ACCESS_KEY=your-secret-key
+PUBLIC_AWS_DEFAULT_REGION=us-west-2
+PUBLIC_AWS_BUCKET=snipeit-public
+```
+
+<Info>
+  S3-compatible storage providers (MinIO, DigitalOcean Spaces, Wasabi) can be configured using the `*_AWS_ENDPOINT` and `*_AWS_PATH_STYLE` variables.
+</Info>
+
+## Security Settings
+
+See the [Security](/admin/security) page for detailed security configuration including:
+- CSRF protection
+- Content Security Policy
+- Trusted proxies
+- Login throttling
+- Session security
+
+## Advanced Settings
+
+### Image Processing
+
+```bash .env
+IMAGE_LIB=gd
+```
+
+<ParamField path="IMAGE_LIB" type="string" default="gd">
+  Image processing library. Options: `gd` or `imagick` (if installed).
+</ParamField>
+
+### Logging
+
+```bash .env
+LOG_CHANNEL=single
+LOG_MAX_DAYS=10
+LOG_DEPRECATIONS=false
+```
+
+<ParamField path="LOG_CHANNEL" type="string" default="single">
+  Log storage method. Options: `single`, `daily`, `slack`, `syslog`, `errorlog`.
+</ParamField>
+
+### Performance Limits
+
+```bash .env
+LDAP_TIME_LIM=600
+BACKUP_TIME_LIMIT=600
+IMPORT_TIME_LIMIT=600
+IMPORT_MEMORY_LIMIT=500M
+REPORT_TIME_LIMIT=12000
+API_THROTTLE_PER_MINUTE=120
+```
+
+These settings control execution time and memory limits for long-running operations.
+
+### API Settings
+
+```bash .env
+API_TOKEN_EXPIRATION_YEARS=15
+API_THROTTLE_PER_MINUTE=120
+```
+
+<ParamField path="API_TOKEN_EXPIRATION_YEARS" type="integer" default="15">
+  How many years before API tokens expire.
+</ParamField>
+
+<ParamField path="API_THROTTLE_PER_MINUTE" type="integer" default="120">
+  Maximum API requests per minute per IP address.
+</ParamField>
+
+## Applying Configuration Changes
+
+After modifying your `.env` file:
+
+1. Clear the configuration cache:
+   ```bash
+   php artisan config:clear
+   ```
+
+2. Restart your web server/PHP-FPM:
+   ```bash
+   sudo systemctl restart php8.1-fpm
+   sudo systemctl restart nginx
+   ```
+
+<Warning>
+  Always backup your `.env` file before making changes. Some settings (like `APP_KEY`) cannot be changed after initial setup without losing access to encrypted data.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Security Settings" icon="shield-halved" href="/admin/security">
+    Configure authentication, 2FA, and security headers
+  </Card>
+  <Card title="Backups" icon="database" href="/admin/backups">
+    Set up automated database and file backups
+  </Card>
+  <Card title="Categories" icon="folder-tree" href="/admin/categories">
+    Organize your assets with categories
+  </Card>
+  <Card title="Companies" icon="building" href="/admin/companies">
+    Enable multi-tenant company support
+  </Card>
+</CardGroup>

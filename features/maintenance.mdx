@@ -1,0 +1,436 @@
+---
+title: Maintenance
+description: Track asset repairs, maintenance schedules, warranty work, and service history with cost and supplier tracking
+icon: wrench
+---
+
+## Overview
+
+The Maintenance feature in Snipe-IT helps you track repairs, scheduled maintenance, upgrades, and service history for your assets. Each maintenance record captures what was done, when, who performed it, costs, and whether it was covered under warranty.
+
+## What is a Maintenance Record?
+
+A maintenance entry documents service performed on an asset:
+
+- **Repairs** - Fixing broken or damaged equipment
+- **Scheduled Maintenance** - Regular servicing and upkeep
+- **Upgrades** - Hardware or software improvements
+- **Warranty Work** - Service covered by warranty
+- **Calibration** - Precision equipment calibration
+- **Testing** - PAT tests, safety inspections
+- **Support** - Hardware or software support services
+
+<Note>
+Maintenance records are always associated with a specific asset and cannot exist independently.
+</Note>
+
+## Creating Maintenance Records
+
+<Steps>
+  <Step title="Select Asset">
+    Navigate to the asset that requires maintenance
+  </Step>
+  
+  <Step title="Add Maintenance">
+    Click "Add Maintenance" from asset details
+  </Step>
+  
+  <Step title="Basic Information">
+    - Maintenance name/title (required)
+    - Maintenance type (required)
+    - Start date (required)
+    - Completion date (optional)
+  </Step>
+  
+  <Step title="Service Details">
+    - Supplier/vendor who performed work
+    - Cost of maintenance
+    - Warranty status (is this warranty work?)
+    - Service URL (link to ticket/documentation)
+  </Step>
+  
+  <Step title="Documentation">
+    - Detailed notes about work performed
+    - Upload related files/receipts
+    - Reference numbers
+  </Step>
+</Steps>
+
+## Maintenance Types
+
+Snipe-IT includes predefined maintenance types:
+
+<CardGroup cols={2}>
+  <Card title="Maintenance" icon="screwdriver-wrench">
+    Regular scheduled maintenance and upkeep
+  </Card>
+  
+  <Card title="Repair" icon="hammer">
+    Fixing broken or damaged equipment
+  </Card>
+  
+  <Card title="Upgrade" icon="arrow-up">
+    Hardware or software improvements
+  </Card>
+  
+  <Card title="PAT Test" icon="plug">
+    Portable Appliance Testing for safety
+  </Card>
+  
+  <Card title="Calibration" icon="sliders">
+    Precision equipment calibration
+  </Card>
+  
+  <Card title="Software Support" icon="code">
+    Software troubleshooting and support
+  </Card>
+  
+  <Card title="Hardware Support" icon="microchip">
+    Hardware troubleshooting and support
+  </Card>
+  
+  <Card title="Configuration Change" icon="gears">
+    System configuration modifications
+  </Card>
+</CardGroup>
+
+<Tip>
+Maintenance types help categorize and report on different kinds of service activities.
+</Tip>
+
+## Warranty Tracking
+
+### Warranty Status Flag
+
+Mark maintenance as warranty work:
+- Checkbox for "Is Warranty"
+- Track warranty vs. paid repairs
+- Cost should be $0 for true warranty work
+- Report on warranty utilization
+
+### Warranty Coverage
+
+Assets have warranty information:
+- Warranty months (set on asset)
+- Purchase date + warranty months = expiration
+- Maintenance records track warranty service
+- Alerts for expiring warranties
+
+<Note>
+If maintenance is marked as warranty work but costs money, it may indicate out-of-warranty service.
+</Note>
+
+## Date Tracking
+
+### Start Date
+
+When maintenance began:
+- Required field
+- When asset was taken for service
+- Or when issue was first reported
+- Used for calculating downtime
+
+### Completion Date
+
+When service was finished:
+- Optional field
+- Asset returned to service
+- Leave blank for in-progress work
+- Calculate service duration
+
+### Service Time Calculation
+
+```
+Service Duration = Completion Date - Start Date
+```
+
+Track average repair times:
+- By maintenance type
+- By supplier/vendor
+- By asset type
+- Identify bottlenecks
+
+## Cost Tracking
+
+### Recording Costs
+
+- Cost per maintenance event
+- Warranty vs. paid service
+- Labor and parts costs combined
+- Currency support
+
+### Total Maintenance Cost
+
+Per asset reporting:
+```
+Total Maintenance Cost = Sum of all maintenance costs
+```
+
+### Cost Analysis
+
+<AccordionGroup>
+  <Accordion title="By Asset">
+    Track total maintenance spend per asset to identify high-cost items.
+  </Accordion>
+  
+  <Accordion title="By Type">
+    Compare costs across maintenance types (repairs vs. upgrades).
+  </Accordion>
+  
+  <Accordion title="By Supplier">
+    Evaluate vendor costs and performance.
+  </Accordion>
+  
+  <Accordion title="Warranty vs. Paid">
+    Calculate warranty savings and out-of-warranty expenses.
+  </Accordion>
+</AccordionGroup>
+
+## Supplier Management
+
+Track service providers:
+
+- Assign supplier to maintenance record
+- Track which vendors service which assets
+- Supplier performance metrics
+- Contact information stored
+- Reporting by supplier
+
+<Tip>
+Use suppliers to track both parts vendors and service providers.
+</Tip>
+
+## Service Documentation
+
+### Notes Field
+
+Capture detailed information:
+- Description of problem
+- Work performed
+- Parts replaced
+- Troubleshooting steps
+- Technician observations
+- Follow-up required
+
+### URL Field
+
+Link to external documentation:
+- Service ticket systems
+- Vendor support cases
+- Knowledge base articles
+- Work order systems
+- External invoices
+
+### File Uploads
+
+Attach related files:
+- Service invoices
+- Diagnostic reports
+- Before/after photos
+- Warranty documents
+- Technical specifications
+
+## Company Scoping
+
+Maintenance follows asset's company:
+
+- Inherits from associated asset
+- Cannot cross company boundaries
+- Company-specific reporting
+- Multi-tenant support
+
+<Note>
+The `CompanyableChildTrait` ensures maintenance records respect company boundaries through their parent asset.
+</Note>
+
+## Audit Trail
+
+Complete maintenance history:
+
+- All maintenance records for an asset
+- Chronological service history
+- Who created each record
+- When records were added
+- Modifications tracked in action log
+
+## Reporting
+
+### Maintenance Reports
+
+<CardGroup cols={2}>
+  <Card title="Asset History" icon="clock-rotate-left">
+    Complete service history for each asset
+  </Card>
+  
+  <Card title="Cost Summary" icon="dollar-sign">
+    Total maintenance costs by asset, type, supplier
+  </Card>
+  
+  <Card title="Upcoming Service" icon="calendar-days">
+    Assets due for scheduled maintenance
+  </Card>
+  
+  <Card title="Warranty Usage" icon="shield-halved">
+    Warranty vs. paid service breakdown
+  </Card>
+  
+  <Card title="Service Duration" icon="hourglass">
+    Average time to complete by type
+  </Card>
+  
+  <Card title="Vendor Performance" icon="ranking-star">
+    Compare suppliers by cost and duration
+  </Card>
+</CardGroup>
+
+### Sorting and Filtering
+
+Maintenance records can be sorted by:
+- Asset tag/name
+- Maintenance type
+- Start date
+- Completion date
+- Cost
+- Supplier
+- Warranty status
+
+## Search Capabilities
+
+Find maintenance records by:
+- Maintenance name
+- Asset tag or name
+- Serial number
+- Maintenance type
+- Notes content
+- Supplier name
+- Date ranges
+- Cost ranges
+
+## Deletion
+
+Maintenance records can be deleted if:
+- User has delete permission
+- No dependencies prevent deletion
+- Soft-deleted first (recoverable)
+- Hard delete removes permanently
+
+<Warning>
+Deleting maintenance records removes service history. Consider keeping records for warranty and compliance purposes.
+</Warning>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Detailed Notes">
+    Always document what was done, why, and any follow-up needed. Future you will thank you.
+  </Accordion>
+  
+  <Accordion title="Accurate Dates">
+    Record actual start and completion dates, not when you created the record.
+  </Accordion>
+  
+  <Accordion title="Cost Tracking">
+    Enter all costs, even if $0 for warranty work. This helps track total cost of ownership.
+  </Accordion>
+  
+  <Accordion title="Warranty Flag">
+    Mark warranty work correctly to track warranty utilization and identify issues.
+  </Accordion>
+  
+  <Accordion title="Supplier Assignment">
+    Always assign a supplier to track vendor performance and relationships.
+  </Accordion>
+  
+  <Accordion title="File Attachments">
+    Upload invoices and service reports for complete documentation.
+  </Accordion>
+  
+  <Accordion title="Consistent Types">
+    Use maintenance types consistently across your organization for better reporting.
+  </Accordion>
+</AccordionGroup>
+
+## Common Workflows
+
+### Laptop Repair
+
+1. Asset fails, user reports issue
+2. Create maintenance record:
+   - Type: Repair
+   - Start date: Today
+   - Notes: "Screen not displaying"
+   - Supplier: Laptop repair vendor
+3. Send for repair
+4. Receive invoice and asset back
+5. Update maintenance record:
+   - Completion date: Today
+   - Cost: $250
+   - Notes: "Replaced LCD panel"
+   - Upload invoice
+
+### Scheduled Server Maintenance
+
+1. Plan maintenance window
+2. Create maintenance record:
+   - Type: Maintenance
+   - Start date: Scheduled date
+   - Notes: "Quarterly maintenance - firmware updates, clean"
+   - Is Warranty: No
+3. Perform maintenance
+4. Update completion date and notes
+5. Document any issues found
+
+### Warranty Claim
+
+1. Asset under warranty fails
+2. Create maintenance record:
+   - Type: Repair
+   - Is Warranty: Yes
+   - Cost: $0 (covered by warranty)
+   - Supplier: Manufacturer
+   - URL: Link to warranty case
+3. Ship to manufacturer
+4. Track completion date
+5. Document work performed
+
+### Upgrade Installation
+
+1. Plan hardware upgrade
+2. Create maintenance record:
+   - Type: Upgrade
+   - Notes: "Installing additional RAM"
+   - Cost: Parts cost
+   - Start date: Installation date
+3. Perform upgrade
+4. Check out new components to asset
+5. Complete maintenance record
+6. Update asset specifications if needed
+
+## Integration Points
+
+### With Assets
+
+- Maintenance history shown on asset page
+- Asset details available in maintenance view
+- Company relationship inherited
+- Location tracking for serviced assets
+
+### With Suppliers
+
+- Supplier contact info accessible
+- Vendor performance tracking
+- Cost analysis by supplier
+- Relationship management
+
+### With Components
+
+- Document component replacements
+- Link to component checkouts
+- Track parts used in repairs
+- Warranty on components
+
+## Related Features
+
+- [Assets](/features/assets) - Assets requiring maintenance
+- [Components](/features/components) - Parts replaced during maintenance
+- [Users](/features/users) - Who performed or requested maintenance

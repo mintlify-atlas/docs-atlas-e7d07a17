@@ -1,0 +1,434 @@
+---
+title: Users
+description: Manage employee records, access permissions, and track asset assignments to people in your organization
+icon: users
+---
+
+## Overview
+
+Users in Snipe-IT represent people in your organization - employees, contractors, and anyone who needs to be assigned assets, licenses, or accessories. Users can also have login credentials to access the system based on their assigned permissions.
+
+## User Types
+
+<CardGroup cols={2}>
+  <Card title="System Users" icon="user-gear">
+    Have login access to Snipe-IT with specific permissions to manage inventory.
+  </Card>
+  
+  <Card title="Asset Recipients" icon="user">
+    People who receive assets but may not have system access.
+  </Card>
+  
+  <Card title="Managers" icon="user-tie">
+    Can manage other users and view their direct reports' assets.
+  </Card>
+  
+  <Card title="Administrators" icon="user-shield">
+    Have elevated permissions to configure and manage the system.
+  </Card>
+</CardGroup>
+
+## Creating Users
+
+<Steps>
+  <Step title="Basic Information">
+    - First name (required)
+    - Last name (optional)
+    - Display name (optional - falls back to first + last)
+    - Username (required, unique)
+    - Email address (optional but recommended)
+  </Step>
+  
+  <Step title="Employment Details">
+    - Job title
+    - Employee number
+    - Department
+    - Manager
+    - Start date
+    - End date (for contractors/termed employees)
+  </Step>
+  
+  <Step title="Location & Company">
+    - Default location
+    - Company assignment (for multi-company)
+    - Remote worker status
+    - VIP status flag
+  </Step>
+  
+  <Step title="Contact Information">
+    - Phone number
+    - Mobile number
+    - Address, city, state, zip
+    - Country
+    - Website
+  </Step>
+  
+  <Step title="System Access">
+    - Password (if login access)
+    - Activated status
+    - Permissions / Groups
+    - Two-factor authentication
+  </Step>
+</Steps>
+
+## User Profile
+
+### Display Name
+
+Users can have a custom display name:
+- Set explicitly via `display_name` field
+- Falls back to first name + last name
+- Respects global name format setting (first-last or last-first)
+
+### Avatar
+
+Profile pictures:
+- Upload custom avatar
+- Use Gravatar (if email provided)
+- External URLs supported (Google, etc.)
+- Default avatar if none set
+
+## Permissions System
+
+### Permission Types
+
+<AccordionGroup>
+  <Accordion title="Superuser">
+    - Complete system access
+    - All permissions enabled
+    - Cannot be restricted
+    - Bypasses all permission checks
+  </Accordion>
+  
+  <Accordion title="Admin">
+    - Administrative access
+    - Can manage most resources
+    - Can create/edit users
+    - Cannot access some superuser functions
+  </Accordion>
+  
+  <Accordion title="User Permissions">
+    Granular control over:
+    - Assets (view, create, edit, delete, checkout, checkin)
+    - Licenses
+    - Accessories
+    - Consumables
+    - Components
+    - Users
+    - Reports
+    - Settings
+  </Accordion>
+  
+  <Accordion title="Groups">
+    - Users inherit permissions from groups
+    - Individual permissions can override group permissions
+    - User-specific permission of -1 denies access
+    - User-specific permission of 1 grants access
+  </Accordion>
+</AccordionGroup>
+
+### Permission Hierarchy
+
+```
+1. Individual user permission = 1 → Granted
+2. Individual user permission = -1 → Denied
+3. Group permission = 1 → Granted
+4. No permissions set → Denied
+```
+
+## Asset Assignments
+
+### Viewing User Assets
+
+Each user profile shows:
+- Assets checked out to them
+- Licenses assigned to them
+- Accessories checked out
+- Consumables received
+- Total value of assigned items
+
+### Assignment History
+
+Complete audit trail:
+- What was assigned
+- When it was assigned
+- Who performed the assignment
+- Check-in history
+- Acceptance status
+
+## Manager Relationships
+
+### Assigning Managers
+
+- Each user can have one manager
+- Managers can have multiple direct reports
+- Supports hierarchical org structures
+- Manager can view reports' assets
+
+### Manager Features
+
+<CardGroup cols={2}>
+  <Card title="Subordinate Access" icon="diagram-subtask">
+    View all direct and indirect reports recursively.
+  </Card>
+  
+  <Card title="Asset Visibility" icon="eye">
+    See assets assigned to managed users.
+  </Card>
+  
+  <Card title="Request Approval" icon="check-circle">
+    Approve asset requests from team members.
+  </Card>
+  
+  <Card title="Reports" icon="file-chart-column">
+    Generate reports for managed users.
+  </Card>
+</CardGroup>
+
+<Note>
+The `getAllSubordinates()` method returns all direct and indirect reports recursively.
+</Note>
+
+## Location Assignment
+
+### Default Location
+
+- User's primary location
+- Used when checking out assets
+- Asset location inherits from user
+- Can be different from company location
+
+### Remote Workers
+
+Mark users as remote:
+- Flag for remote employees
+- Reporting and filtering
+- Location handling differences
+- Shipping logistics
+
+## Department Management
+
+Organize users by department:
+- IT, HR, Sales, Engineering, etc.
+- Department-based reporting
+- Asset distribution analysis
+- Budget allocation
+
+## VIP Status
+
+Designate important users:
+- Executive leadership
+- Priority support
+- Special handling
+- Reporting and alerts
+
+## Employment Dates
+
+### Start Date
+
+- Employee hire date
+- Contractor start date
+- Reporting on tenure
+- Onboarding tracking
+
+### End Date
+
+- Termination date
+- Contract end date
+- Offboarding workflow trigger
+- Asset recovery reminders
+
+<Tip>
+Set end dates for contractors to automatically trigger return reminders before their last day.
+</Tip>
+
+## Authentication
+
+### Local Authentication
+
+- Username and password
+- Password requirements (min 8 characters)
+- Password reset functionality
+- Account activation status
+
+### LDAP/AD Integration
+
+- Sync from LDAP/Active Directory
+- Import user information
+- `ldap_import` flag tracks synced users
+- Optional password sync
+
+### SCIM Integration
+
+- SCIM 2.0 protocol support
+- External identity providers
+- `scim_externalid` tracks external ID
+- Automated provisioning/deprovisioning
+
+### Two-Factor Authentication
+
+<Steps>
+  <Step title="Global Setting">
+    - Disabled (0)
+    - Optional (1) 
+    - Required for all (2)
+  </Step>
+  
+  <Step title="User Opt-In">
+    If optional, users can enable 2FA
+  </Step>
+  
+  <Step title="Enrollment">
+    User scans QR code with authenticator app
+  </Step>
+  
+  <Step title="Verification">
+    Login requires password + TOTP code
+  </Step>
+</Steps>
+
+## Profile Editing
+
+Users can edit their own profile if enabled:
+- Global setting: `profile_edit`
+- Users can update contact info
+- Cannot change permissions
+- Cannot change username
+
+## Locale Preferences
+
+Users can set their preferred language:
+- Used for UI display
+- Email notifications
+- Reports and exports
+- Falls back to global setting
+
+## User Deletion
+
+Users can only be deleted if:
+- No assets assigned
+- No accessories checked out
+- No licenses assigned
+- No consumables checked out
+- Not managing other users
+- Not managing locations
+- Account not already soft-deleted
+
+<Warning>
+The `isDeletable()` check prevents accidental data loss by ensuring all assignments are cleared first.
+</Warning>
+
+## Auto-Assign Licenses
+
+Feature for automatic license assignment:
+- Enable per user
+- Automatically assigns available license seats
+- Useful for standard software packages
+- Streamlines onboarding
+
+## Custom Fields
+
+Extend user records:
+- Employee ID formats
+- Custom contact fields
+- Internal codes
+- Additional attributes
+- Department-specific data
+
+Configured at the field level for users.
+
+## Reporting
+
+### User Reports
+
+<AccordionGroup>
+  <Accordion title="User Listing">
+    All users with their details, location, and manager information.
+  </Accordion>
+  
+  <Accordion title="Asset Assignments">
+    What assets, licenses, and accessories each user has.
+  </Accordion>
+  
+  <Accordion title="User Value">
+    Total value of items assigned to each user.
+  </Accordion>
+  
+  <Accordion title="Acceptance Report">
+    Track which users have accepted their assigned items.
+  </Accordion>
+  
+  <Accordion title="Activity Report">
+    User login history and system activity.
+  </Accordion>
+</AccordionGroup>
+
+## API Access
+
+Users can have API tokens:
+- Personal access tokens (via Laravel Passport)
+- OAuth 2.0 support
+- Token-based authentication
+- Scoped permissions
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Username Convention" icon="at">
+    Use a consistent format like first.last or flast for all usernames.
+  </Card>
+  
+  <Card title="Email Required" icon="envelope">
+    Always enter email addresses for notifications and password resets.
+  </Card>
+  
+  <Card title="Manager Hierarchy" icon="sitemap">
+    Maintain accurate manager relationships for reporting and access.
+  </Card>
+  
+  <Card title="Departments" icon="building">
+    Assign all users to departments for better organization and reporting.
+  </Card>
+  
+  <Card title="Employment Dates" icon="calendar">
+    Track start/end dates for onboarding and offboarding workflows.
+  </Card>
+  
+  <Card title="Least Privilege" icon="shield-halved">
+    Grant minimum permissions needed - use groups for common roles.
+  </Card>
+</CardGroup>
+
+## Common Workflows
+
+### New Employee Onboarding
+
+1. Create user account with employment details
+2. Assign to manager and department
+3. Set location and company
+4. Check out standard asset package
+5. Assign software licenses
+6. User accepts assets via email
+
+### Employee Termination
+
+1. Set end date on user record
+2. Generate report of assigned items
+3. Check in all assets, accessories
+4. Remove license assignments
+5. Deactivate user account
+6. Archive or delete (if no history needed)
+
+### Manager Change
+
+1. Update user's manager field
+2. New manager gains visibility
+3. Old manager loses access
+4. Audit trail preserved
+
+## Related Features
+
+- [Assets](/features/assets) - Assign hardware to users
+- [Licenses](/features/licenses) - Assign software to users
+- [Accessories](/features/accessories) - Distribute peripherals
+- [Locations](/features/locations) - User default locations

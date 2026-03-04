@@ -1,0 +1,317 @@
+---
+title: "API Overview"
+description: "Learn how to use the Snipe-IT REST API to integrate with your systems"
+icon: "code"
+---
+
+Snipe-IT provides a comprehensive REST API that allows you to programmatically interact with your IT asset management system. The API supports all major CRUD operations for assets, users, accessories, components, consumables, and more.
+
+## Getting Started
+
+### Base URL
+
+All API requests are made to:
+
+```
+https://your-snipe-it-instance.com/api/v1/
+```
+
+Replace `your-snipe-it-instance.com` with your actual Snipe-IT domain.
+
+### Authentication
+
+The Snipe-IT API uses Bearer token authentication. You need to include your API token in the `Authorization` header of every request.
+
+#### Generating an API Token
+
+1. Log into your Snipe-IT instance
+2. Navigate to your user profile (top right corner)
+3. Go to **API Keys** tab
+4. Click **Create New Token**
+5. Give your token a descriptive name
+6. Copy the generated token immediately (it won't be shown again)
+
+<Warning>
+API tokens have the same permissions as the user who created them. Store tokens securely and never commit them to version control.
+</Warning>
+
+### Making API Requests
+
+Include your API token in the `Authorization` header:
+
+```bash
+curl -X GET https://your-snipe-it-instance.com/api/v1/hardware \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+
+<CodeGroup>
+```python Python
+import requests
+
+url = "https://your-snipe-it-instance.com/api/v1/hardware"
+headers = {
+    "Authorization": "Bearer YOUR_API_TOKEN",
+    "Accept": "application/json"
+}
+
+response = requests.get(url, headers=headers)
+data = response.json()
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://your-snipe-it-instance.com/api/v1/hardware';
+const headers = {
+  'Authorization': 'Bearer YOUR_API_TOKEN',
+  'Accept': 'application/json'
+};
+
+axios.get(url, { headers })
+  .then(response => console.log(response.data))
+  .catch(error => console.error(error));
+```
+
+```php PHP
+<?php
+$url = "https://your-snipe-it-instance.com/api/v1/hardware";
+$headers = [
+    "Authorization: Bearer YOUR_API_TOKEN",
+    "Accept: application/json"
+];
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+$data = json_decode($response, true);
+curl_close($ch);
+?>
+```
+</CodeGroup>
+
+## API Rate Limiting
+
+By default, the Snipe-IT API is rate-limited to prevent abuse. The default limit is configured in your `.env` file:
+
+```bash .env
+API_THROTTLE_PER_MINUTE=120
+```
+
+If you exceed the rate limit, you'll receive a `429 Too Many Requests` response.
+
+## Common API Endpoints
+
+### Assets (Hardware)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/hardware` | GET | List all assets |
+| `/api/v1/hardware` | POST | Create a new asset |
+| `/api/v1/hardware/{id}` | GET | Get a specific asset |
+| `/api/v1/hardware/{asset}` | PATCH/PUT | Update an asset |
+| `/api/v1/hardware/{id}` | DELETE | Delete an asset |
+| `/api/v1/hardware/{id}/checkout` | POST | Check out an asset |
+| `/api/v1/hardware/{id}/checkin` | POST | Check in an asset |
+| `/api/v1/hardware/bytag/{tag}` | GET | Get asset by asset tag |
+| `/api/v1/hardware/byserial/{serial}` | GET | Get asset by serial number |
+| `/api/v1/hardware/{asset}/audit` | POST | Audit an asset |
+
+### Users
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/users` | GET | List all users |
+| `/api/v1/users` | POST | Create a new user |
+| `/api/v1/users/{id}` | GET | Get a specific user |
+| `/api/v1/users/{user}` | PATCH/PUT | Update a user |
+| `/api/v1/users/{id}` | DELETE | Delete a user |
+| `/api/v1/users/{user}/assets` | GET | Get assets assigned to user |
+| `/api/v1/users/{user}/accessories` | GET | Get accessories assigned to user |
+| `/api/v1/users/{user}/licenses` | GET | Get licenses assigned to user |
+
+### Accessories
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/accessories` | GET | List all accessories |
+| `/api/v1/accessories` | POST | Create an accessory |
+| `/api/v1/accessories/{id}` | GET | Get a specific accessory |
+| `/api/v1/accessories/{accessory}` | PATCH/PUT | Update an accessory |
+| `/api/v1/accessories/{accessory}/checkout` | POST | Check out an accessory |
+| `/api/v1/accessories/{accessory}/checkin` | POST | Check in an accessory |
+
+### Components
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/components` | GET | List all components |
+| `/api/v1/components` | POST | Create a component |
+| `/api/v1/components/{id}` | GET | Get a specific component |
+| `/api/v1/components/{id}/checkout` | POST | Check out a component |
+| `/api/v1/components/{id}/checkin` | POST | Check in a component |
+
+### Other Resources
+
+The API also supports:
+- **Categories** (`/api/v1/categories`)
+- **Companies** (`/api/v1/companies`)
+- **Departments** (`/api/v1/departments`)
+- **Consumables** (`/api/v1/consumables`)
+- **Licenses** (`/api/v1/licenses`)
+- **Locations** (`/api/v1/locations`)
+- **Manufacturers** (`/api/v1/manufacturers`)
+- **Models** (`/api/v1/models`)
+- **Status Labels** (`/api/v1/statuslabels`)
+- **Suppliers** (`/api/v1/suppliers`)
+
+## Response Format
+
+All API responses are returned in JSON format.
+
+### Success Response
+
+```json
+{
+  "total": 100,
+  "rows": [
+    {
+      "id": 1,
+      "name": "MacBook Pro",
+      "asset_tag": "ASSET-001",
+      "serial": "C02XK1ABCD",
+      "model": {
+        "id": 5,
+        "name": "MacBook Pro 16\" 2021"
+      },
+      "status_label": {
+        "id": 2,
+        "name": "Ready to Deploy"
+      },
+      "assigned_to": null,
+      "created_at": {
+        "datetime": "2024-01-15 10:30:00",
+        "formatted": "Jan 15, 2024"
+      }
+    }
+  ]
+}
+```
+
+### Error Response
+
+```json
+{
+  "status": "error",
+  "message": "Asset not found",
+  "payload": null
+}
+```
+
+Common HTTP status codes:
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request
+- `401` - Unauthorized (invalid token)
+- `403` - Forbidden (insufficient permissions)
+- `404` - Not Found
+- `422` - Validation Error
+- `429` - Too Many Requests (rate limited)
+- `500` - Server Error
+
+## Pagination
+
+List endpoints support pagination using the following parameters:
+
+- `limit` - Number of results per page (default: 50, max: determined by `MAX_RESULTS` setting)
+- `offset` - Number of results to skip
+
+```bash
+curl -X GET "https://your-snipe-it-instance.com/api/v1/hardware?limit=20&offset=0" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+## Filtering and Searching
+
+Many endpoints support filtering and searching:
+
+- `search` - Search across multiple fields
+- `sort` - Column to sort by
+- `order` - Sort order (`asc` or `desc`)
+
+```bash
+# Search for assets
+curl -X GET "https://your-snipe-it-instance.com/api/v1/hardware?search=macbook" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+
+# Sort by name ascending
+curl -X GET "https://your-snipe-it-instance.com/api/v1/hardware?sort=name&order=asc" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+## Personal Access Tokens
+
+Users can manage their own API tokens programmatically:
+
+```bash
+# Create a personal access token
+curl -X POST https://your-snipe-it-instance.com/api/v1/account/personal-access-tokens \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "My Integration Token"}'
+
+# List personal access tokens
+curl -X GET https://your-snipe-it-instance.com/api/v1/account/personal-access-tokens \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+
+# Delete a personal access token
+curl -X DELETE https://your-snipe-it-instance.com/api/v1/account/personal-access-tokens/{tokenId} \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+
+## Best Practices
+
+<AccordionGroup>
+<Accordion title="Use specific permissions" icon="shield-check">
+Create dedicated API users with only the permissions needed for your integration. Don't use admin tokens unless absolutely necessary.
+</Accordion>
+
+<Accordion title="Handle rate limits gracefully" icon="gauge">
+Implement exponential backoff when you receive 429 responses. Respect the rate limits to ensure system stability.
+</Accordion>
+
+<Accordion title="Validate responses" icon="circle-check">
+Always check HTTP status codes and validate response data before processing. Handle errors appropriately.
+</Accordion>
+
+<Accordion title="Use filtering to reduce data transfer" icon="filter">
+When possible, use search and filter parameters to retrieve only the data you need instead of fetching all records.
+</Accordion>
+
+<Accordion title="Keep tokens secure" icon="lock">
+Store API tokens in environment variables or secure credential stores. Never hardcode them in your application code.
+</Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Full API Reference" icon="book" href="https://snipe-it.readme.io/reference">
+  Complete API documentation with all endpoints and parameters
+</Card>
+
+<Card title="LDAP Integration" icon="network-wired" href="/integration/ldap">
+  Sync users from Active Directory or LDAP
+</Card>
+
+<Card title="SAML SSO" icon="key" href="/integration/saml">
+  Configure single sign-on with SAML providers
+</Card>
+
+<Card title="Webhooks" icon="webhook" href="/integration/webhooks">
+  Set up notifications for Slack, Teams, and more
+</Card>
+</CardGroup>

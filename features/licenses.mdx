@@ -1,0 +1,279 @@
+---
+title: Licenses
+description: Manage software licenses with seat tracking, assignments, expiration monitoring, and compliance reporting
+icon: key
+---
+
+## Overview
+
+Licenses in Snipe-IT represent software licenses and subscriptions. Each license has a specified number of seats that can be assigned to users or assets, with comprehensive tracking of availability, expiration, and maintenance.
+
+## Key Concepts
+
+### License Seats
+
+Each license has a total seat count:
+- **Total Seats** - The number of licenses purchased
+- **Assigned Seats** - Seats currently checked out
+- **Available Seats** - Remaining seats for assignment
+- **Unreassignable Seats** - Seats from non-reassignable licenses that were checked out
+
+<Note>
+When you create a license with 50 seats, Snipe-IT automatically creates 50 individual seat records that can be assigned independently.
+</Note>
+
+## Creating Licenses
+
+<Steps>
+  <Step title="Basic Information">
+    - License name (e.g., "Microsoft Office 365")
+    - Category (license type)
+    - Total seats/quantities
+    - Product key or serial (encrypted field)
+  </Step>
+  
+  <Step title="Purchase Details">
+    - Supplier
+    - Purchase cost
+    - Purchase date
+    - Order number
+  </Step>
+  
+  <Step title="Licensing Terms">
+    - Licensed to (individual/organization name)
+    - Licensed to email
+    - License expiration date
+    - Termination date (if applicable)
+    - Maintenance status
+  </Step>
+  
+  <Step title="Assignment Settings">
+    - Mark as reassignable or not
+    - Set minimum quantity alerts
+  </Step>
+</Steps>
+
+## Checking Out License Seats
+
+### To Users
+
+Assign license seats to employees:
+
+1. Navigate to the license
+2. Click "Check Out" on an available seat
+3. Select the user
+4. Add optional notes
+5. System automatically:
+   - Sends acceptance email (if required)
+   - Updates available count
+   - Creates audit log entry
+
+### To Assets
+
+Assign seats to specific hardware:
+
+1. Useful for device-based licenses
+2. Links software to physical assets
+3. Tracks software inventory per device
+4. Automatically associates with asset's user
+
+<Warning>
+Once all seats are assigned, you must check in a seat or increase the seat count before making new assignments.
+</Warning>
+
+## Checking In License Seats
+
+<AccordionGroup>
+  <Accordion title="Reassignable Licenses">
+    When a license is marked as reassignable:
+    - Seats can be checked in and reassigned
+    - No permanent record of who used the seat
+    - Useful for floating licenses
+    - Audit log tracks all assignments
+  </Accordion>
+  
+  <Accordion title="Non-Reassignable Licenses">
+    When a license is NOT reassignable:
+    - Checked out seats become "unreassignable"
+    - Seat cannot be reassigned even after check-in
+    - Useful for permanent user licenses
+    - New seats must be purchased for additional users
+  </Accordion>
+</AccordionGroup>
+
+## Managing Seat Count
+
+### Increasing Seats
+
+When you purchase additional licenses:
+1. Edit the license
+2. Increase the seat count
+3. New seat records are created automatically
+4. Change is logged in audit trail
+
+### Decreasing Seats
+
+When licenses expire or are reduced:
+1. Edit the license
+2. Decrease the seat count
+3. System only removes unassigned seats
+4. Cannot reduce below current assigned count
+
+<Tip>
+Snipe-IT protects you from accidentally removing assigned seats - you must check them in first.
+</Tip>
+
+## License Status
+
+### Active Licenses
+
+A license is considered active when:
+- Expiration date is in the future (or not set)
+- Termination date is in the future (or not set)
+- License has not been soft-deleted
+
+### Expired Licenses
+
+Licenses are marked expired when:
+- Expiration date has passed
+- Shows in "Expired Licenses" report
+- Email alerts sent (if configured)
+
+### Terminated Licenses
+
+Termination date tracks when:
+- Subscription was cancelled
+- Contract was terminated
+- License is no longer valid
+
+## Compliance Tracking
+
+### Free Seats Report
+
+Quickly view:
+- Licenses with available seats
+- Percentage of utilization
+- Under/over-licensed software
+
+### Expiring Licenses Report
+
+Monitor licenses that:
+- Expire within X days (configurable)
+- Already expired
+- Need renewal action
+- Require budget planning
+
+<CardGroup cols={2}>
+  <Card title="Compliance Dashboard" icon="gauge">
+    View at-a-glance compliance status, showing total licenses, assigned seats, and utilization rates.
+  </Card>
+  
+  <Card title="Audit Trail" icon="clock-rotate-left">
+    Complete history of all license seat assignments, check-ins, and modifications.
+  </Card>
+</CardGroup>
+
+## Custom Fields
+
+Extend license tracking with custom fields:
+- Maintenance contract numbers
+- Vendor support contacts
+- Internal cost center codes
+- Approval workflows
+- Custom expiration types
+
+## Email Notifications
+
+Configure automatic emails for:
+- License assigned to user
+- License seat checked in
+- User acceptance required
+- Expiration warnings (based on global settings)
+- Maintenance renewals due
+
+## Manufacturer & Supplier
+
+### Manufacturer
+
+Track software vendor:
+- Microsoft
+- Adobe
+- Autodesk
+- Custom vendors
+
+### Supplier
+
+Track purchase source:
+- Direct from vendor
+- Reseller/VAR
+- Volume licensing portal
+- Different from manufacturer
+
+## Maintenance Tracking
+
+Mark licenses as "maintained" to track:
+- Active support contracts
+- Update eligibility
+- Premium support access
+- Additional cost/renewals
+
+<Note>
+Maintenance status is separate from the license expiration date.
+</Note>
+
+## Depreciation
+
+Licenses support depreciation:
+- Assign a depreciation model
+- Requires purchase date and cost
+- Calculate current value
+- Track in financial reports
+
+## Bulk Import
+
+Import multiple licenses via CSV:
+1. Download CSV template
+2. Fill in license information
+3. Include seat counts
+4. Map columns on import
+5. Validate and process
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Seat Management">
+    Purchase slightly more seats than needed to accommodate growth, but monitor utilization to avoid waste.
+  </Accordion>
+  
+  <Accordion title="Expiration Monitoring">
+    Set up expiration alerts well in advance (60-90 days) to allow time for renewal processes.
+  </Accordion>
+  
+  <Accordion title="Reassignable Strategy">
+    Use reassignable licenses for pooled software, non-reassignable for user-specific licenses like Office 365.
+  </Accordion>
+  
+  <Accordion title="Asset Assignment">
+    Assign licenses to assets when they're device-based, to users when they're user-based.
+  </Accordion>
+  
+  <Accordion title="Cost Tracking">
+    Always enter purchase cost and date to track total software spend and plan budgets.
+  </Accordion>
+</AccordionGroup>
+
+## Reporting Capabilities
+
+Generate reports for:
+- License compliance status
+- Software spend by vendor
+- Expiring/expired licenses
+- Seat utilization rates
+- Assigned vs. available seats
+- User license inventory
+
+## Related Features
+
+- [Assets](/features/assets) - Assign licenses to hardware
+- [Users](/features/users) - Assign licenses to people
+- [Accessories](/features/accessories) - Track physical software media

@@ -1,0 +1,385 @@
+---
+title: Consumables
+description: Track items that are consumed and not returned - printer toner, office supplies, and disposable items
+icon: spray-can
+---
+
+## Overview
+
+Consumables are items that are used up and not expected to be returned. Common examples include printer toner cartridges, staples, pens, notebooks, cleaning supplies, and similar disposable or single-use items.
+
+## Key Differences from Accessories
+
+| Feature | Consumables | Accessories |
+|---------|-------------|-------------|
+| **Return Expected** | No - consumed/used | Yes - returned on check-in |
+| **Check-In** | Cannot be checked in | Can be checked in |
+| **Usage Pattern** | Single-use or depleted | Reusable |
+| **Examples** | Toner, paper, batteries | Mouse, keyboard, charger |
+
+<Note>
+The main distinction: consumables are never checked back in because they're used up.
+</Note>
+
+## Creating Consumables
+
+<Steps>
+  <Step title="Basic Information">
+    - Name (e.g., "HP 410A Black Toner")
+    - Category (consumables category)
+    - Total quantity on hand
+    - Model number or item number
+  </Step>
+  
+  <Step title="Purchase Details">
+    - Supplier information
+    - Purchase cost per unit
+    - Purchase date
+    - Order number
+  </Step>
+  
+  <Step title="Inventory Settings">
+    - Minimum quantity threshold
+    - Default storage location
+    - Manufacturer
+    - Company (for multi-company setups)
+  </Step>
+  
+  <Step title="Additional Options">
+    - Mark as requestable
+    - Upload product image
+    - Add internal notes
+  </Step>
+</Steps>
+
+## Checkout Process
+
+### To Users
+
+Distribute consumables to employees:
+
+1. Navigate to the consumable
+2. Click "Check Out to User"
+3. Select the recipient
+4. Specify quantity (defaults to 1)
+5. Add optional notes
+6. Confirm checkout
+
+<Warning>
+Once checked out, consumables cannot be checked back in - the quantity is permanently reduced.
+</Warning>
+
+### Quantity Tracking
+
+```
+Remaining = Total Quantity - Total Checked Out
+```
+
+The system automatically:
+- Reduces available quantity
+- Tracks who received items
+- Records checkout date and quantity
+- Maintains complete audit trail
+
+## Inventory Management
+
+### Restocking
+
+When receiving new stock:
+
+<Steps>
+  <Step title="Edit Consumable">
+    Open the consumable details page
+  </Step>
+  
+  <Step title="Update Quantity">
+    Increase the total quantity by amount received
+  </Step>
+  
+  <Step title="Update Purchase Info">
+    Optionally update cost, supplier, purchase date
+  </Step>
+  
+  <Step title="Save Changes">
+    Change is logged in the audit trail
+  </Step>
+</Steps>
+
+### Minimum Quantity Alerts
+
+Set reorder points to avoid stockouts:
+
+- Define minimum quantity threshold
+- Receive alerts when stock is low
+- Email notifications (if configured)
+- Shows in "Low Stock" reports
+- Plan purchasing ahead of time
+
+<Tip>
+Set minimum quantities to your average monthly usage × lead time to ensure you never run out.
+</Tip>
+
+## Categories
+
+Organize consumables effectively:
+
+<CardGroup cols={2}>
+  <Card title="Printer Supplies" icon="print">
+    Toner, ink cartridges, drums, maintenance kits
+  </Card>
+  
+  <Card title="Office Supplies" icon="pencil">
+    Pens, paper, notebooks, folders, labels
+  </Card>
+  
+  <Card title="Cleaning Supplies" icon="spray-can-sparkles">
+    Wipes, compressed air, cleaning solutions
+  </Card>
+  
+  <Card title="Batteries" icon="battery-full">
+    AA, AAA, 9V, lithium, rechargeable
+  </Card>
+</CardGroup>
+
+## Requestable Consumables
+
+Allow users to request consumables:
+
+### Setup Process
+
+1. Mark consumable as "Requestable"
+2. Ensure category allows requests
+3. Set minimum quantity to maintain availability
+4. Configure approval workflow
+
+### User Workflow
+
+<AccordionGroup>
+  <Accordion title="Browse & Request">
+    - Users view requestable consumables
+    - Submit request with quantity needed
+    - Add note explaining need
+    - Request routed to admins
+  </Accordion>
+  
+  <Accordion title="Admin Approval">
+    - Review pending requests
+    - Check available quantity
+    - Approve or deny request
+    - Automatic checkout on approval
+  </Accordion>
+  
+  <Accordion title="Fulfillment">
+    - User receives email notification
+    - Admin prepares items for pickup
+    - Quantity automatically deducted
+    - Request marked as fulfilled
+  </Accordion>
+</AccordionGroup>
+
+## Custom Fields
+
+Extend consumable tracking:
+
+- **Expiration Dates** - For items that expire
+- **Lot Numbers** - For batch tracking
+- **Color/Variant** - For multiple variants
+- **Compatibility** - Which devices/models work with
+- **Storage Location** - Specific shelf or bin
+- **Reorder SKU** - Vendor part number
+
+<Note>
+Custom fields are configured at the category level and apply to all consumables in that category.
+</Note>
+
+## Reporting
+
+### Available Reports
+
+<AccordionGroup>
+  <Accordion title="Low Stock Report">
+    Shows consumables below minimum quantity:
+    - Items needing reorder
+    - Current vs. minimum quantity
+    - Suggested reorder amounts
+    - Supplier information
+  </Accordion>
+  
+  <Accordion title="Usage Report">
+    Track consumption patterns:
+    - Checkouts by time period
+    - Usage by user/department
+    - Trend analysis
+    - Budget forecasting
+  </Accordion>
+  
+  <Accordion title="Inventory Value">
+    Financial tracking:
+    - Current inventory value
+    - Cost per consumable type
+    - Spend by category
+    - Budget vs. actual
+  </Accordion>
+  
+  <Accordion title="User Assignments">
+    What each user has received:
+    - Historical checkout records
+    - Quantity per user
+    - Date ranges
+    - Export capabilities
+  </Accordion>
+</AccordionGroup>
+
+## Cost Tracking
+
+### Total Value Calculation
+
+```
+Inventory Value = Unit Cost × Remaining Quantity
+Total Distributed = Unit Cost × Checked Out Quantity
+Total Value = Inventory Value + Total Distributed
+```
+
+### Financial Management
+
+- Track spend per category
+- Monitor consumption rates
+- Plan budgets based on usage
+- Identify cost-saving opportunities
+- Compare suppliers
+
+## Location Management
+
+Assign storage locations:
+
+- Central supply room
+- Department-specific storage
+- Multi-location inventory
+- Location-based access control
+- Easier physical audits
+
+## Company Assignment
+
+For multi-company environments:
+
+- Separate inventory by company
+- Company-specific budgets
+- Enforce boundaries
+- Independent reporting
+- Shared or exclusive stock
+
+## Audit Trail
+
+Complete history tracking:
+
+- Every checkout recorded
+- User, date, quantity tracked
+- Notes preserved
+- Quantity changes logged
+- Purchase updates recorded
+
+<Tip>
+The audit trail helps identify usage patterns and potential abuse or waste.
+</Tip>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Naming Standards">
+    Include brand, model, and key specs: "HP 410A Cyan Toner (CF411A)" not just "Toner".
+  </Accordion>
+  
+  <Accordion title="Model Numbers">
+    Always include manufacturer part numbers to ensure correct reordering.
+  </Accordion>
+  
+  <Accordion title="Cost Tracking">
+    Record accurate per-unit costs to track total spend and inventory value.
+  </Accordion>
+  
+  <Accordion title="Minimum Quantities">
+    Set minimums based on:
+    - Average monthly usage
+    - Supplier lead time
+    - Criticality of item
+    - Storage space availability
+  </Accordion>
+  
+  <Accordion title="Regular Reviews">
+    Periodically review:
+    - Usage patterns
+    - Minimum quantity settings
+    - Slow-moving items
+    - Cost comparisons
+  </Accordion>
+  
+  <Accordion title="Physical Counts">
+    Conduct regular physical inventory counts to verify system accuracy.
+  </Accordion>
+</AccordionGroup>
+
+## Common Use Cases
+
+### Printer Toner Management
+
+1. Stock multiple toner types
+2. Set minimums based on printer usage
+3. Users request toner when low
+4. Admins approve and distribute
+5. Reorder when minimum reached
+
+### Office Supply Distribution
+
+1. Maintain central supply inventory
+2. Allow user self-service requests
+3. Track usage by department
+4. Identify high-consumption areas
+5. Budget based on trends
+
+### IT Consumables
+
+1. Track cables, batteries, cleaning supplies
+2. Check out to techs as needed
+3. Monitor consumption rates
+4. Prevent hoarding
+5. Ensure availability for support
+
+## Email Notifications
+
+Automatic notifications for:
+
+- **Checkout Confirmation** - User receives consumable
+- **Low Stock Alerts** - When below minimum quantity
+- **Request Submitted** - User requests consumable
+- **Request Approved/Denied** - Admin decision
+- **Acceptance Required** - If category requires it
+
+## Image Support
+
+Add product images:
+
+- Upload photos of consumables
+- Helps users identify correct items
+- Shows in listings and requests
+- Falls back to category image
+
+## Bulk Import
+
+Import consumables via CSV:
+
+1. Download template
+2. Fill in consumable data
+3. Include quantities and costs
+4. Map columns on import
+5. Validate and import
+
+<Warning>
+Remember: Consumables cannot be checked back in. If items are reusable and should be returned, use Accessories instead.
+</Warning>
+
+## Related Features
+
+- [Accessories](/features/accessories) - For reusable items that are returned
+- [Components](/features/components) - For parts installed in assets
+- [Assets](/features/assets) - For individually tracked items
+- [Users](/features/users) - Distribute consumables to people

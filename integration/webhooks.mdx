@@ -1,0 +1,456 @@
+---
+title: "Webhooks & Notifications"
+description: "Configure webhooks to send notifications to Slack, Microsoft Teams, Google Chat, and custom endpoints"
+icon: "webhook"
+---
+
+Snipe-IT can send real-time notifications about asset activities to various messaging platforms and custom webhooks. Stay informed about checkouts, check-ins, and other important events without constantly checking the system.
+
+## Supported Platforms
+
+Snipe-IT supports webhooks for:
+
+<CardGroup cols={2}>
+<Card title="Slack" icon="slack">
+Send notifications to Slack channels
+</Card>
+
+<Card title="Microsoft Teams" icon="microsoft">
+Integrate with Teams workflows
+</Card>
+
+<Card title="Google Chat" icon="google">
+Post messages to Google Workspace Chat spaces
+</Card>
+
+<Card title="Generic Webhooks" icon="webhook">
+Send JSON payloads to any custom endpoint
+</Card>
+</CardGroup>
+
+## Configuration
+
+Navigate to **Admin** > **Settings** > **Slack** (the webhook settings are in the Slack section regardless of platform).
+
+### Slack Webhook Setup
+
+<Steps>
+<Step title="Create Slack App">
+1. Go to [Slack API](https://api.slack.com/apps)
+2. Click **Create New App**
+3. Choose **From scratch**
+4. Enter an app name (e.g., "Snipe-IT Notifications")
+5. Select your workspace
+6. Click **Create App**
+</Step>
+
+<Step title="Enable Incoming Webhooks">
+1. In your app settings, click **Incoming Webhooks**
+2. Toggle **Activate Incoming Webhooks** to On
+3. Click **Add New Webhook to Workspace**
+4. Select the channel for notifications
+5. Click **Allow**
+6. Copy the Webhook URL (it starts with `https://hooks.slack.com/services/`)
+</Step>
+
+<Step title="Configure Snipe-IT">
+1. In Snipe-IT, go to **Admin** > **Settings** > **Slack**
+2. Select **Slack** from the dropdown
+3. **Webhook Endpoint**: Paste your Slack webhook URL
+4. **Channel**: Enter the channel (e.g., `#it-notifications`)
+5. **Bot Name**: Enter a display name (e.g., "Snipe-IT Bot")
+6. Click **Test** to verify the connection
+7. Click **Save**
+</Step>
+</Steps>
+
+### Microsoft Teams Webhook Setup
+
+<Info>
+Microsoft has deprecated the old "Incoming Webhook" connector. Use the new **Workflows** approach for Teams webhooks.
+</Info>
+
+<Steps>
+<Step title="Create Workflow in Teams">
+1. Open Microsoft Teams
+2. Navigate to the channel where you want notifications
+3. Click the **···** (More options) next to the channel name
+4. Select **Workflows**
+5. Search for "Post to a channel when a webhook request is received"
+6. Click **Add workflow**
+</Step>
+
+<Step title="Configure Workflow">
+1. Select the **Team** and **Channel**
+2. Click **Next**
+3. Click **Add workflow**
+4. Copy the webhook URL (it contains `workflows` in the path)
+</Step>
+
+<Step title="Configure Snipe-IT">
+1. In Snipe-IT, go to **Admin** > **Settings** > **Slack**
+2. Select **Microsoft Teams** from the dropdown
+3. **Webhook Endpoint**: Paste your Teams workflow webhook URL
+4. Channel field will show "#NA" (not applicable for Teams)
+5. Click **Test** to verify the connection
+6. Click **Save**
+</Step>
+</Steps>
+
+<Warning>
+If you're using an old Teams webhook URL (without "workflows" in the path), you'll see a deprecation warning. These old webhooks will stop working soon. Migrate to the new Workflows-based approach.
+</Warning>
+
+### Google Chat Webhook Setup
+
+<Steps>
+<Step title="Create Webhook in Google Chat">
+1. Open Google Chat
+2. Go to the space where you want notifications
+3. Click the space name at the top
+4. Select **Apps & integrations**
+5. Click **Add webhooks**
+6. Enter a name (e.g., "Snipe-IT")
+7. Optionally add an avatar URL
+8. Click **Save**
+9. Click the **⋮** next to your new webhook
+10. Copy the webhook URL
+</Step>
+
+<Step title="Configure Snipe-IT">
+1. In Snipe-IT, go to **Admin** > **Settings** > **Slack**
+2. Select **Google Workspaces** from the dropdown
+3. **Webhook Endpoint**: Paste your Google Chat webhook URL (format: `https://chat.googleapis.com/v1/spaces/*/messages?key=*`)
+4. Channel field will show "#NA" (not applicable)
+5. Click **Test** to verify the connection
+6. Click **Save**
+</Step>
+</Steps>
+
+### Generic Webhook Setup
+
+For custom integrations, you can send notifications to any HTTP endpoint that accepts JSON.
+
+<Steps>
+<Step title="Prepare Your Endpoint">
+Create an endpoint that:
+- Accepts POST requests
+- Expects JSON payload
+- Returns 200 OK on success
+</Step>
+
+<Step title="Configure Snipe-IT">
+1. In Snipe-IT, go to **Admin** > **Settings** > **Slack**
+2. Select **General Webhook** from the dropdown
+3. **Webhook Endpoint**: Enter your custom webhook URL
+4. **Channel**: Enter a value (required, e.g., `#general`)
+5. Click **Test** to verify the connection
+6. Click **Save**
+</Step>
+</Steps>
+
+## Environment Variables
+
+You can also configure webhooks via environment variables in your `.env` file:
+
+```bash .env
+# Webhook endpoint URL
+WEBHOOK_ENDPOINT="https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX"
+
+# Slack channel (include the #)
+WEBHOOK_CHANNEL="#it-notifications"
+
+# Bot display name
+WEBHOOK_BOTNAME="Snipe-IT Bot"
+```
+
+## Webhook Payload Format
+
+### Slack Payload
+
+```json
+{
+  "channel": "#it-notifications",
+  "text": "Asset ASSET-001 (MacBook Pro) was checked out to John Doe by Admin User",
+  "username": "Snipe-IT Bot",
+  "icon_emoji": ""
+}
+```
+
+### Google Chat Payload
+
+```json
+{
+  "text": "Asset ASSET-001 (MacBook Pro) was checked out to John Doe by Admin User"
+}
+```
+
+### Microsoft Teams Payload (Workflows)
+
+```json
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "content": {
+        "type": "AdaptiveCard",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "Asset ASSET-001 (MacBook Pro) was checked out to John Doe by Admin User"
+          }
+        ],
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "version": "1.0"
+      }
+    }
+  ]
+}
+```
+
+## Events That Trigger Webhooks
+
+Webhooks are triggered for the following events:
+
+<AccordionGroup>
+<Accordion title="Asset Checkout" icon="arrow-right-from-bracket">
+When an asset is checked out to a user or location:
+
+**Message Format:**
+```
+Asset [ASSET_TAG] ([ASSET_NAME]) was checked out to [USER_NAME] by [ADMIN_NAME]
+```
+</Accordion>
+
+<Accordion title="Asset Check-in" icon="arrow-right-to-bracket">
+When an asset is checked back in:
+
+**Message Format:**
+```
+Asset [ASSET_TAG] ([ASSET_NAME]) was checked in by [ADMIN_NAME]
+```
+</Accordion>
+
+<Accordion title="Accessory Checkout" icon="headphones">
+When an accessory is checked out:
+
+**Message Format:**
+```
+Accessory [ACCESSORY_NAME] was checked out to [USER_NAME] by [ADMIN_NAME]
+```
+</Accordion>
+
+<Accordion title="Consumable Checkout" icon="flask">
+When a consumable is checked out:
+
+**Message Format:**
+```
+Consumable [CONSUMABLE_NAME] was checked out to [USER_NAME] by [ADMIN_NAME]
+```
+</Accordion>
+
+<Accordion title="License Checkout" icon="certificate">
+When a license seat is checked out:
+
+**Message Format:**
+```
+License seat for [LICENSE_NAME] was checked out to [USER_NAME] by [ADMIN_NAME]
+```
+</Accordion>
+</AccordionGroup>
+
+## Testing Your Webhook
+
+### Using the Built-in Test
+
+1. Navigate to **Admin** > **Settings** > **Slack**
+2. Configure your webhook settings
+3. Click the **Test** button
+4. Check your messaging platform for the test message
+5. If successful, you'll see a green success message
+6. If failed, you'll see an error with details
+
+### Manual Testing via Command Line
+
+You can test webhooks using curl:
+
+<CodeGroup>
+```bash Slack
+curl -X POST https://hooks.slack.com/services/YOUR/WEBHOOK/URL \
+  -H "Content-Type: application/json" \
+  -d '{
+    "channel": "#it-notifications",
+    "text": "Test message from Snipe-IT",
+    "username": "Snipe-IT Bot"
+  }'
+```
+
+```bash Google Chat
+curl -X POST 'https://chat.googleapis.com/v1/spaces/XXXXX/messages?key=XXXXX' \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Test message from Snipe-IT"
+  }'
+```
+
+```bash Microsoft Teams (Workflows)
+curl -X POST https://your-tenant.webhook.office.com/webhookb2/XXXXX \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Test message from Snipe-IT"
+  }'
+```
+</CodeGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+<Accordion title="Test Fails with Connection Error" icon="plug">
+**Possible Causes:**
+- Firewall blocking outbound HTTPS connections
+- Incorrect webhook URL
+- Webhook has been revoked in the messaging platform
+
+**Solutions:**
+- Verify the webhook URL is correct and complete
+- Test network connectivity: `curl https://hooks.slack.com`
+- Check firewall rules allow outbound HTTPS
+- Regenerate webhook in your messaging platform
+</Accordion>
+
+<Accordion title="Test Succeeds but No Events Received" icon="bell-slash">
+**Possible Causes:**
+- Webhook settings were not saved
+- Events are not configured to trigger webhooks in code
+
+**Solutions:**
+- Click **Save** after testing
+- Verify webhook settings are saved in database
+- Check `storage/logs/laravel.log` for webhook errors
+- Perform a test checkout to trigger an event
+</Accordion>
+
+<Accordion title="401 or 403 Errors" icon="lock">
+**Possible Causes:**
+- Webhook URL is incorrect or expired
+- Channel doesn't exist or bot doesn't have access
+
+**Solutions:**
+- Regenerate the webhook in your messaging platform
+- Verify the channel name includes `#` for Slack
+- Check bot has permission to post in the channel
+</Accordion>
+
+<Accordion title="Teams Deprecation Warning" icon="triangle-exclamation">
+If you see a Teams webhook deprecation warning:
+
+1. The old "Incoming Webhook" connector is deprecated
+2. Your webhook URL doesn't contain "workflows"
+3. Create a new workflow-based webhook (see Teams setup above)
+4. Update Snipe-IT with the new webhook URL
+5. Old webhooks will stop working in the near future
+</Accordion>
+
+<Accordion title="Messages Have Wrong Format" icon="message">
+**For Microsoft Teams:**
+- New workflow webhooks use Adaptive Cards format
+- Old webhooks used MessageCard format
+- Ensure you're using the correct webhook type
+
+**For Custom Webhooks:**
+- Check your endpoint expects the JSON format Snipe-IT sends
+- Review the payload format section above
+- Add logging to your endpoint to inspect received data
+</Accordion>
+</AccordionGroup>
+
+## Advanced Configuration
+
+### Custom Webhook Handler
+
+If you're building a custom integration, your endpoint should:
+
+1. Accept POST requests
+2. Parse JSON body
+3. Extract message text from the payload
+4. Return HTTP 200 on success
+5. Return appropriate error codes on failure
+
+Example webhook receiver in Node.js:
+
+```javascript
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+app.post('/webhook', (req, res) => {
+  const { channel, text, username } = req.body;
+  
+  console.log('Received webhook:');
+  console.log('Channel:', channel);
+  console.log('Message:', text);
+  console.log('From:', username);
+  
+  // Process the notification
+  // ... your custom logic here ...
+  
+  res.status(200).send('OK');
+});
+
+app.listen(3000, () => {
+  console.log('Webhook receiver listening on port 3000');
+});
+```
+
+### Webhook Retry Logic
+
+<Info>
+Snipe-IT does not automatically retry failed webhooks. If a webhook fails, the event is logged but not retried.
+</Info>
+
+To handle failed webhooks:
+- Monitor `storage/logs/laravel.log` for webhook errors
+- Implement error handling in your webhook receiver
+- Consider using a message queue for critical notifications
+
+### Multiple Webhooks
+
+Currently, Snipe-IT supports one webhook endpoint at a time. To send to multiple destinations:
+
+1. Create a proxy endpoint that receives Snipe-IT webhooks
+2. Have the proxy forward to multiple destinations
+3. Point Snipe-IT to your proxy endpoint
+
+## Security Considerations
+
+<CardGroup cols={2}>
+<Card title="Secure Storage" icon="vault">
+Webhook URLs often contain secrets. Store them in `.env` file, not in code.
+</Card>
+
+<Card title="HTTPS Only" icon="lock">
+Always use HTTPS endpoints for webhooks to encrypt data in transit.
+</Card>
+
+<Card title="Validate Sources" icon="shield-check">
+If building custom receivers, validate requests come from your Snipe-IT instance.
+</Card>
+
+<Card title="Monitor Logs" icon="file-lines">
+Regularly review webhook logs for failures or suspicious activity.
+</Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="API Overview" icon="code" href="/integration/api-overview">
+  Learn about the Snipe-IT REST API
+</Card>
+
+<Card title="Email Configuration" icon="envelope" href="/admin/configuration">
+  Set up email notifications
+</Card>
+</CardGroup>

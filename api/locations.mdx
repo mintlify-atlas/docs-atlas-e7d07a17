@@ -1,0 +1,321 @@
+---
+title: 'Locations'
+description: 'Manage locations via the API'
+---
+
+The Locations API allows you to manage physical locations where assets and users can be assigned.
+
+## List Locations
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/locations" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter results
+</ParamField>
+
+<ParamField query="sort" type="string" default="created_at">
+  Column to sort by. Allowed values: `id`, `name`, `address`, `address2`, `city`, `state`, `country`, `zip`, `manager`, `parent`, `assets_count`, `assigned_assets_count`, `users_count`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="parent_id" type="integer">
+  Filter by parent location ID
+</ParamField>
+
+<ParamField query="manager_id" type="integer">
+  Filter by location manager ID
+</ParamField>
+
+<ParamField query="company_id" type="integer">
+  Filter by company ID
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total number of locations
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  Array of location objects
+  <Expandable title="Location Object">
+    <ResponseField name="id" type="integer">
+      Location ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Location name
+    </ResponseField>
+    <ResponseField name="address" type="string">
+      Street address
+    </ResponseField>
+    <ResponseField name="address2" type="string">
+      Address line 2
+    </ResponseField>
+    <ResponseField name="city" type="string">
+      City
+    </ResponseField>
+    <ResponseField name="state" type="string">
+      State/province
+    </ResponseField>
+    <ResponseField name="country" type="string">
+      Country
+    </ResponseField>
+    <ResponseField name="zip" type="string">
+      ZIP/postal code
+    </ResponseField>
+    <ResponseField name="phone" type="string">
+      Phone number
+    </ResponseField>
+    <ResponseField name="fax" type="string">
+      Fax number
+    </ResponseField>
+    <ResponseField name="currency" type="string">
+      Currency code
+    </ResponseField>
+    <ResponseField name="ldap_ou" type="string">
+      LDAP organizational unit
+    </ResponseField>
+    <ResponseField name="parent" type="object">
+      Parent location information
+    </ResponseField>
+    <ResponseField name="manager" type="object">
+      Location manager information
+    </ResponseField>
+    <ResponseField name="company" type="object">
+      Company information
+    </ResponseField>
+    <ResponseField name="assets_count" type="integer">
+      Total number of assets at this location
+    </ResponseField>
+    <ResponseField name="assigned_assets_count" type="integer">
+      Number of assigned assets at this location
+    </ResponseField>
+    <ResponseField name="users_count" type="integer">
+      Number of users at this location
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      Location notes
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Get Location by ID
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/locations/{location_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="location_id" type="integer" required>
+  The location ID
+</ParamField>
+
+## Create Location
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/locations" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "New York Office",
+    "address": "123 Main Street",
+    "city": "New York",
+    "state": "NY",
+    "country": "US",
+    "zip": "10001"
+  }'
+```
+</CodeGroup>
+
+<ParamField body="name" type="string" required>
+  Location name
+</ParamField>
+
+<ParamField body="address" type="string">
+  Street address
+</ParamField>
+
+<ParamField body="address2" type="string">
+  Address line 2
+</ParamField>
+
+<ParamField body="city" type="string">
+  City
+</ParamField>
+
+<ParamField body="state" type="string">
+  State/province
+</ParamField>
+
+<ParamField body="country" type="string">
+  Country (2-letter code)
+</ParamField>
+
+<ParamField body="zip" type="string">
+  ZIP/postal code
+</ParamField>
+
+<ParamField body="phone" type="string">
+  Phone number
+</ParamField>
+
+<ParamField body="fax" type="string">
+  Fax number
+</ParamField>
+
+<ParamField body="parent_id" type="integer">
+  Parent location ID (for hierarchical locations)
+</ParamField>
+
+<ParamField body="manager_id" type="integer">
+  Location manager's user ID
+</ParamField>
+
+<ParamField body="company_id" type="integer">
+  Company ID
+</ParamField>
+
+<ParamField body="currency" type="string">
+  Currency code (e.g., USD, EUR)
+</ParamField>
+
+<ParamField body="ldap_ou" type="string">
+  LDAP organizational unit
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Location notes
+</ParamField>
+
+## Update Location
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://your-domain.com/api/v1/locations/{location_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Location Name",
+    "manager_id": 5
+  }'
+```
+</CodeGroup>
+
+<ParamField path="location_id" type="integer" required>
+  The location ID
+</ParamField>
+
+## Delete Location
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://your-domain.com/api/v1/locations/{location_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="location_id" type="integer" required>
+  The location ID
+</ParamField>
+
+## Get Location's Users
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/locations/{location_id}/users" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="location_id" type="integer" required>
+  The location ID
+</ParamField>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+Returns all users assigned to this location.
+
+## Get Location's Assets
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/locations/{location_id}/assets" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="location_id" type="integer" required>
+  The location ID
+</ParamField>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+Returns all assets with this as their default location.
+
+## Get Assigned Assets
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/locations/{location_id}/assigned/assets" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="location_id" type="integer" required>
+  The location ID
+</ParamField>
+
+Returns all assets currently assigned to this location.
+
+## Get Assigned Accessories
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/locations/{location_id}/assigned/accessories" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="location_id" type="integer" required>
+  The location ID
+</ParamField>
+
+Returns all accessories currently assigned to users at this location.

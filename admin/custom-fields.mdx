@@ -1,0 +1,329 @@
+---
+title: Custom Fields
+description: Create and manage custom fields to track additional asset information
+---
+
+Custom fields allow you to extend Snipe-IT's default asset properties to track organization-specific information like warranty expiration dates, MAC addresses, serial numbers, or any other metadata.
+
+## Understanding Custom Fields
+
+Custom fields in Snipe-IT work differently than typical custom field implementations:
+
+<Info>
+  When you create a custom field, Snipe-IT automatically adds a new column to the `assets` table in your database. The column name follows the format `_snipeit_fieldname_id`.
+</Info>
+
+Custom fields are organized into **fieldsets**, which are then associated with **asset models**. This three-tier structure provides flexibility:
+
+1. **Custom Field** - The individual field definition (e.g., "MAC Address")
+2. **Fieldset** - A group of related fields (e.g., "Network Equipment Fields")
+3. **Asset Model** - Associates fieldsets with specific types of assets (e.g., "Cisco Switch")
+
+## Creating Custom Fields
+
+### Step 1: Navigate to Custom Fields
+
+Go to **Settings** (gear icon) > **Custom Fields** in the admin interface.
+
+### Step 2: Create a New Field
+
+Click **Create New Field** and configure the following:
+
+<ParamField path="Name" type="string" required>
+  The field name (e.g., "MAC Address", "Warranty Expires"). This becomes the label shown to users.
+</ParamField>
+
+<ParamField path="Field Type" type="select" required>
+  The type of input element:
+  - **Text** - Single-line text input
+  - **Textarea** - Multi-line text area
+  - **Listbox** - Dropdown selection
+  - **Checkbox** - Multiple choice checkboxes
+  - **Radio** - Single choice radio buttons
+</ParamField>
+
+<ParamField path="Format" type="select">
+  Validation format for the field:
+  - **ANY** - No validation
+  - **ALPHA** - Letters only
+  - **ALPHA-DASH** - Letters, numbers, dashes, underscores
+  - **NUMERIC** - Numbers only
+  - **ALPHA-NUMERIC** - Letters and numbers
+  - **EMAIL** - Valid email address
+  - **DATE** - Valid date format
+  - **URL** - Valid URL
+  - **IP** - Valid IP address (v4 or v6)
+  - **IPV4** - Valid IPv4 address
+  - **IPV6** - Valid IPv6 address
+  - **MAC** - Valid MAC address (00:00:00:00:00:00)
+  - **BOOLEAN** - True/false value
+  - **CUSTOM REGEX** - Your own regular expression
+</ParamField>
+
+### Available Validation Formats
+
+The validation formats are defined in `app/Models/CustomField.php:24-39`:
+
+```php
+const PREDEFINED_FORMATS = [
+    'ANY'           => '',
+    'CUSTOM REGEX'  => '',
+    'ALPHA'         => 'alpha',
+    'ALPHA-DASH'    => 'alpha_dash',
+    'NUMERIC'       => 'numeric',
+    'ALPHA-NUMERIC' => 'alpha_num',
+    'EMAIL'         => 'email',
+    'DATE'          => 'date',
+    'URL'           => 'url',
+    'IP'            => 'ip',
+    'IPV4'          => 'ipv4',
+    'IPV6'          => 'ipv6',
+    'MAC'           => 'regex:/^[a-fA-F0-9]{2}:[a-fA-F0-9]{2}:[a-fA-F0-9]{2}:[a-fA-F0-9]{2}:[a-fA-F0-9]{2}:[a-fA-F0-9]{2}$/',
+    'BOOLEAN'       => 'boolean',
+];
+```
+
+### Field Options
+
+<ParamField path="Field Values" type="textarea">
+  For listbox, checkbox, and radio fields, specify options in this format:
+  ```
+  value1|Display Text 1
+  value2|Display Text 2
+  value3|Display Text 3
+  ```
+  If you omit the display text, the value will be used as the label.
+</ParamField>
+
+<ParamField path="Encrypt Field" type="boolean">
+  Encrypt the field value in the database. Useful for sensitive information like license keys or passwords.
+  
+  **Note:** Encrypted fields cannot be displayed in list views or emails.
+</ParamField>
+
+<ParamField path="Require Unique Values" type="boolean">
+  Enforce uniqueness across all assets. Useful for fields like MAC addresses or serial numbers.
+</ParamField>
+
+<ParamField path="Help Text" type="string">
+  Optional help text displayed below the field to guide users.
+</ParamField>
+
+### Display Settings
+
+<ParamField path="Show in List View" type="boolean">
+  Display this field as a column in the main asset listing table.
+</ParamField>
+
+<ParamField path="Show in Email" type="boolean">
+  Include this field value in checkout/checkin notification emails.
+</ParamField>
+
+<ParamField path="Show on User View" type="boolean">
+  Display this field when users view their assigned assets.
+</ParamField>
+
+<ParamField path="Show in Requestable List" type="boolean">
+  Show this field in the list of requestable assets.
+</ParamField>
+
+### Workflow Settings
+
+<ParamField path="Display on Checkout" type="boolean">
+  Show this field in the checkout form, allowing values to be set during checkout.
+</ParamField>
+
+<ParamField path="Display on Checkin" type="boolean">
+  Show this field in the checkin form.
+</ParamField>
+
+<ParamField path="Display During Audit" type="boolean">
+  Include this field in the audit workflow.
+</ParamField>
+
+<ParamField path="Auto-Add to Fieldsets" type="boolean">
+  Automatically add this field to all new fieldsets.
+</ParamField>
+
+## Working with Fieldsets
+
+### Creating a Fieldset
+
+1. Go to **Settings** > **Custom Fields** > **Fieldsets**
+2. Click **Create New Fieldset**
+3. Name your fieldset (e.g., "Computer Custom Fields")
+4. Select the custom fields to include
+5. Save the fieldset
+
+### Associating Fieldsets with Asset Models
+
+1. Navigate to **Settings** > **Asset Models**
+2. Edit or create an asset model
+3. In the **Fieldset** dropdown, select the appropriate fieldset
+4. Save the model
+
+Now, all assets created with this model will include the custom fields from the associated fieldset.
+
+## Example Use Cases
+
+### Network Equipment
+
+Create a fieldset for switches and routers:
+
+- **MAC Address** (Text, MAC format, unique)
+- **Management IP** (Text, IPV4 format)
+- **VLAN Configuration** (Textarea)
+- **Port Count** (Text, Numeric format)
+
+### Computers
+
+Create a fieldset for laptops and desktops:
+
+- **Warranty Expires** (Text, Date format)
+- **BitLocker Recovery Key** (Text, Encrypted)
+- **RAM Capacity** (Listbox: 4GB|4 GB, 8GB|8 GB, 16GB|16 GB, 32GB|32 GB)
+- **Operating System** (Radio: win11|Windows 11, win10|Windows 10, macos|macOS)
+
+### Mobile Devices
+
+Create a fieldset for phones and tablets:
+
+- **Phone Number** (Text)
+- **IMEI** (Text, unique)
+- **Carrier** (Listbox: verizon|Verizon, att|AT&T, tmobile|T-Mobile)
+- **MDM Enrolled** (Checkbox)
+
+## Field Encryption
+
+When you enable **Encrypt Field**, Snipe-IT uses Laravel's encryption to secure the data using your `APP_KEY`.
+
+<Warning>
+  **Critical:** If you change your `APP_KEY` after creating encrypted custom fields, you will lose access to the encrypted data permanently. Always backup your `.env` file.
+</Warning>
+
+Encrypted fields:
+- Cannot be displayed in list views
+- Cannot be included in emails
+- Cannot be displayed on user-facing views
+- Require the `assets.view.encrypted_custom_fields` permission to view
+
+## Setting Default Values
+
+You can set default values for custom fields on a per-model basis:
+
+1. Navigate to **Settings** > **Asset Models**
+2. Edit the asset model
+3. Click on the custom field name
+4. Enter a default value
+5. Save the model
+
+New assets created with this model will have the default value pre-populated.
+
+## Database Structure
+
+Custom fields are stored as additional columns on the `assets` table. The column naming convention is:
+
+```
+_snipeit_{field_name}_{field_id}
+```
+
+For example, a custom field named "MAC Address" with ID 3 would create a column:
+
+```
+_snipeit_mac_address_3
+```
+
+This is handled automatically in `app/Models/CustomField.php:127-189`.
+
+## Permissions
+
+Custom field management requires specific permissions defined in `config/permissions.php:334-351`:
+
+- `customfields.view` - View custom fields
+- `customfields.create` - Create new custom fields
+- `customfields.edit` - Edit existing custom fields
+- `customfields.delete` - Delete custom fields
+
+<Warning>
+  Deleting a custom field permanently removes the database column and all data stored in that field for all assets. This action cannot be undone.
+</Warning>
+
+## API Access
+
+Custom field values are included in the asset API responses:
+
+```json
+{
+  "id": 123,
+  "name": "MacBook Pro",
+  "asset_tag": "MBP-001",
+  "custom_fields": {
+    "MAC Address": {
+      "field": "_snipeit_mac_address_3",
+      "value": "00:1A:2B:3C:4D:5E",
+      "field_format": "MAC"
+    },
+    "Warranty Expires": {
+      "field": "_snipeit_warranty_expires_5",
+      "value": "2026-12-31",
+      "field_format": "DATE"
+    }
+  }
+}
+```
+
+## Best Practices
+
+<Check>
+  **Plan your field structure** - Design fieldsets based on asset categories rather than creating individual fields for every asset.
+</Check>
+
+<Check>
+  **Use appropriate validation** - Apply format validation to ensure data quality (e.g., MAC format for MAC addresses).
+</Check>
+
+<Check>
+  **Limit encrypted fields** - Only encrypt truly sensitive data, as encrypted fields have display limitations.
+</Check>
+
+<Check>
+  **Set meaningful help text** - Guide users on what to enter and in what format.
+</Check>
+
+## Troubleshooting
+
+### Field Not Showing on Asset Form
+
+1. Verify the field is associated with a fieldset
+2. Verify the fieldset is associated with the asset's model
+3. Check that workflow settings (Display on Checkout, etc.) are enabled if needed
+
+### Validation Errors
+
+If custom REGEX validation fails, test your regular expression. The pattern is wrapped with `^` and `$` automatically:
+
+```php
+// Your input: \d{3}-\d{4}
+// Actual regex used: /^\d{3}-\d{4}$/
+```
+
+### Cannot Delete Field
+
+Fields cannot be deleted if they're associated with any fieldsets. First remove the field from all fieldsets, then delete it.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Categories" icon="folder-tree" href="/admin/categories">
+    Organize assets by category type
+  </Card>
+  <Card title="Asset Models" icon="cube" href="/features/assets">
+    Create models and associate fieldsets
+  </Card>
+  <Card title="API Documentation" icon="code" href="/api/assets">
+    Access custom fields via the API
+  </Card>
+  <Card title="Reports" icon="chart-bar" href="/features/assets">
+    Generate reports including custom field data
+  </Card>
+</CardGroup>

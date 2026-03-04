@@ -1,80 +1,261 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get Snipe-IT running in 5 minutes with Docker
+icon: rocket
 ---
 
-## Get started in three steps
+Get your Snipe-IT instance up and running quickly using Docker. This guide will have you managing assets in minutes.
 
-Get your documentation site running locally and make your first customization.
+## Prerequisites
 
-### Step 1: Set up your local environment
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed
+- At least 2GB of available RAM
+- Port 80 available (or modify the port mapping)
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+## Installation with Docker Compose
 
-### Step 2: Deploy your changes
+<Steps>
+  <Step title="Create Docker Compose Configuration">
+    Create a new directory for Snipe-IT and add a `docker-compose.yml` file:
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    ```bash
+    mkdir snipe-it && cd snipe-it
+    ```
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    Create `docker-compose.yml`:
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```yaml docker-compose.yml
+    version: '3'
 
-### Step 3: Go live
+    services:
+      mysql:
+        image: mariadb:11.4.7
+        container_name: snipe-mysql
+        restart: always
+        volumes:
+          - snipe-mysql-data:/var/lib/mysql
+        environment:
+          MYSQL_ROOT_PASSWORD: changeme
+          MYSQL_DATABASE: snipeit
+          MYSQL_USER: snipeit
+          MYSQL_PASSWORD: changeme
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+      snipeit:
+        image: snipe/snipe-it:latest
+        container_name: snipe-it
+        restart: always
+        depends_on:
+          - mysql
+        ports:
+          - "80:80"
+        volumes:
+          - snipe-data:/var/lib/snipeit
+        env_file:
+          - .env
 
-## Next steps
+    volumes:
+      snipe-mysql-data:
+      snipe-data:
+    ```
+  </Step>
 
-Now that you have your docs running, explore these key features:
+  <Step title="Configure Environment Variables">
+    Create a `.env` file in the same directory:
+
+    ```bash .env
+    # Application settings
+    APP_ENV=production
+    APP_DEBUG=false
+    APP_KEY=
+    APP_URL=http://localhost
+    APP_TIMEZONE=UTC
+    APP_LOCALE=en-US
+
+    # Database connection
+    DB_CONNECTION=mysql
+    DB_HOST=mysql
+    DB_PORT=3306
+    DB_DATABASE=snipeit
+    DB_USERNAME=snipeit
+    DB_PASSWORD=changeme
+
+    # Mail settings (update with your SMTP details)
+    MAIL_MAILER=smtp
+    MAIL_HOST=smtp.gmail.com
+    MAIL_PORT=587
+    MAIL_USERNAME=your-email@gmail.com
+    MAIL_PASSWORD=your-password
+    MAIL_FROM_ADDR=your-email@gmail.com
+    MAIL_FROM_NAME='Snipe-IT'
+    ```
+
+    <Warning>
+      The `APP_KEY` will be generated automatically on first run. Never share this key or commit it to version control.
+    </Warning>
+  </Step>
+
+  <Step title="Start Snipe-IT">
+    Launch the containers:
+
+    ```bash
+    docker-compose up -d
+    ```
+
+    Check that containers are running:
+
+    ```bash
+    docker-compose ps
+    ```
+
+    You should see both `snipe-it` and `snipe-mysql` containers with status "Up".
+  </Step>
+
+  <Step title="Complete Web Setup">
+    Open your browser and navigate to `http://localhost`.
+
+    The Snipe-IT setup wizard will guide you through:
+    1. **Database Setup** - Click "Next" (already configured via environment)
+    2. **Create Admin Account** - Set username, email, and password
+    3. **Site Settings** - Configure site name and URL
+    4. **Email Testing** - Optionally test your email configuration
+
+    <Note>
+      The initial setup may take 2-3 minutes while the database schema is created and sample data is seeded.
+    </Note>
+  </Step>
+
+  <Step title="Add Your First Asset">
+    After setup, you'll be redirected to the dashboard. To add your first asset:
+
+    1. Go to **Assets** → **Create New**
+    2. Fill in the asset details:
+       - **Asset Tag**: Unique identifier (e.g., "LAP-001")
+       - **Model**: Click "Create New" to add a model
+         - Name: "Dell Latitude 5420"
+         - Category: "Laptops" (create if needed)
+         - Manufacturer: "Dell" (create if needed)
+       - **Status**: Deployable
+       - **Location**: Your office location
+       - **Purchase Date**: Today's date
+       - **Purchase Cost**: Asset value
+    3. Click **Save**
+
+    <Check>
+      Congratulations! You've added your first asset to Snipe-IT.
+    </Check>
+  </Step>
+</Steps>
+
+## Managing Docker Containers
+
+### View Logs
+
+```bash
+# View Snipe-IT logs
+docker-compose logs -f snipeit
+
+# View database logs
+docker-compose logs -f mysql
+```
+
+### Stop Snipe-IT
+
+```bash
+docker-compose stop
+```
+
+### Start Again
+
+```bash
+docker-compose start
+```
+
+### Update to Latest Version
+
+```bash
+docker-compose pull
+docker-compose up -d
+```
+
+### Backup Your Data
+
+```bash
+# Backup database
+docker exec snipe-mysql mysqldump -u snipeit -pchangeme snipeit > backup.sql
+
+# Backup uploads
+docker cp snipe-it:/var/lib/snipeit ./snipeit-backup
+```
+
+## Next Steps
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Full Installation Guide" icon="server" href="/installation">
+    Explore other installation methods and production setup
+  </Card>
+  <Card title="Configuration" icon="gear" href="/admin/configuration">
+    Configure email, backups, and advanced settings
+  </Card>
+  <Card title="Asset Management" icon="laptop" href="/features/assets">
+    Learn about check-in/check-out workflows
+  </Card>
+  <Card title="API Access" icon="code" href="/api/authentication">
+    Set up API access for integrations
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Port 80 is already in use">
+    Change the port mapping in `docker-compose.yml`:
+    
+    ```yaml
+    ports:
+      - "8080:80"  # Use port 8080 instead
+    ```
+    
+    Then access Snipe-IT at `http://localhost:8080`
+  </Accordion>
+
+  <Accordion title="Database connection failed">
+    Ensure the MySQL container is running:
+    
+    ```bash
+    docker-compose ps mysql
+    ```
+    
+    Check the database credentials in `.env` match those in `docker-compose.yml`.
+  </Accordion>
+
+  <Accordion title="Cannot access from other devices">
+    Update `APP_URL` in `.env` to your server's IP address:
+    
+    ```bash
+    APP_URL=http://192.168.1.100
+    ```
+    
+    Restart the container:
+    
+    ```bash
+    docker-compose restart snipeit
+    ```
+  </Accordion>
+
+  <Accordion title="Email not sending">
+    Verify SMTP settings in `.env`. For Gmail, you may need to:
+    - Enable 2-factor authentication
+    - Generate an app-specific password
+    - Allow less secure apps (not recommended)
+    
+    Test email from **Settings** → **Test Email**.
+  </Accordion>
+</AccordionGroup>
+
+## Community Support
+
+Need help? Join the Snipe-IT community:
+
+- **Discord**: [Join the Discord server](https://discord.gg/yZFtShAcKk)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/grokability/snipe-it/issues)
+- **Documentation**: Explore the rest of this documentation site

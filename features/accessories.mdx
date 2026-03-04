@@ -1,0 +1,334 @@
+---
+title: Accessories
+description: Track keyboards, mice, phone chargers, and other peripheral items with quantity-based inventory management
+icon: computer-mouse
+---
+
+## Overview
+
+Accessories are small peripheral items that you track by quantity rather than individual serial numbers. Think keyboards, mice, phone chargers, dongles, webcams, and similar items where you manage inventory in bulk.
+
+## Key Characteristics
+
+<CardGroup cols={2}>
+  <Card title="Quantity-Based" icon="boxes-stacked">
+    Track items by total quantity, not individual serial numbers.
+  </Card>
+  
+  <Card title="Multiple Checkouts" icon="users">
+    One accessory can be checked out to multiple users or assets simultaneously.
+  </Card>
+  
+  <Card title="No Unique IDs" icon="fingerprint">
+    Unlike assets, accessories don't require unique asset tags.
+  </Card>
+  
+  <Card title="Simple Tracking" icon="gauge-simple">
+    Streamlined for items that don't need detailed lifecycle management.
+  </Card>
+</CardGroup>
+
+## Creating Accessories
+
+<Steps>
+  <Step title="Basic Details">
+    - Name (e.g., "USB-C Charger")
+    - Category (accessories category)
+    - Quantity on hand
+    - Model number (optional)
+  </Step>
+  
+  <Step title="Purchase Information">
+    - Supplier
+    - Purchase cost per unit
+    - Purchase date
+    - Order number
+  </Step>
+  
+  <Step title="Inventory Settings">
+    - Minimum quantity (for alerts)
+    - Default location
+    - Manufacturer
+    - Company assignment
+  </Step>
+  
+  <Step title="Availability">
+    - Mark as requestable (users can request)
+    - Add notes for internal reference
+  </Step>
+</Steps>
+
+## Checkout Process
+
+### Checking Out to Users
+
+1. Navigate to the accessory
+2. Click "Check Out"
+3. Select the user
+4. Specify quantity (defaults to 1)
+5. Add optional note
+6. Confirm checkout
+
+<Note>
+Each checkout reduces the available quantity. Total remaining = Total quantity - Sum of all checkouts.
+</Note>
+
+### Checking Out to Assets
+
+Accessories can be assigned to assets:
+- Useful for bundled items (e.g., laptop charger with laptop)
+- Tracks accessories per asset
+- Links to asset's assigned user
+- Shows in asset detail view
+
+## Check-In Process
+
+When checking in accessories:
+1. Find the checkout record
+2. Click "Check In"
+3. Quantity is returned to available pool
+4. Checkout history is preserved in audit log
+
+<Warning>
+You cannot check in partial quantities from a single checkout - must check in the full amount.
+</Warning>
+
+## Inventory Management
+
+### Available Quantity
+
+```
+Available = Total Quantity - Checked Out Quantity
+```
+
+View real-time availability:
+- Total purchased/on hand
+- Currently checked out
+- Remaining available
+- Percentage utilized
+
+### Minimum Quantity Alerts
+
+Set a minimum threshold:
+- Receive alerts when quantity drops below minimum
+- Plan reorder points
+- Prevent stockouts
+- Email notifications (if configured)
+
+## Requestable Accessories
+
+Enable user self-service:
+
+<AccordionGroup>
+  <Accordion title="Setup">
+    1. Mark accessory as "Requestable"
+    2. Ensure quantity is available
+    3. Category must allow requests
+  </Accordion>
+  
+  <Accordion title="User Experience">
+    - Users browse requestable accessories
+    - Submit request with notes
+    - Admins receive notification
+    - Approve/deny requests
+  </Accordion>
+  
+  <Accordion title="Admin Workflow">
+    - View pending requests
+    - Approve or deny with reason
+    - Auto-checkout on approval
+    - Email confirmation to user
+  </Accordion>
+</AccordionGroup>
+
+## Categories
+
+Organize accessories by category:
+- **Input Devices** - Keyboards, mice, trackpads
+- **Cables & Adapters** - Dongles, converters, cables
+- **Power Supplies** - Chargers, power bricks
+- **Peripherals** - Webcams, headsets, speakers
+- **Custom Categories** - Define your own
+
+<Tip>
+Use categories to group similar accessories for easier reporting and searching.
+</Tip>
+
+## Custom Fields
+
+Accessories support custom fields:
+- Color/variant tracking
+- Connector types
+- Compatibility notes
+- Internal part numbers
+- Warranty information
+
+Custom fields are configured at the category level.
+
+## Bulk Operations
+
+### Adding Inventory
+
+When receiving new accessories:
+1. Edit the accessory
+2. Increase the quantity
+3. Update purchase information if needed
+4. Change logged in audit trail
+
+### Removing Inventory
+
+For lost, damaged, or disposed accessories:
+1. Edit the accessory
+2. Decrease the quantity
+3. Add note explaining reduction
+4. Cannot reduce below checked-out amount
+
+## Reporting
+
+Generate reports on:
+
+<CardGroup cols={2}>
+  <Card title="Low Stock" icon="triangle-exclamation">
+    Accessories below minimum quantity threshold.
+  </Card>
+  
+  <Card title="Checkout History" icon="clock-rotate-left">
+    Who has what accessories and when they were assigned.
+  </Card>
+  
+  <Card title="Inventory Value" icon="dollar-sign">
+    Total value of accessory inventory by cost.
+  </Card>
+  
+  <Card title="User Assignments" icon="user-gear">
+    What accessories are assigned to each user.
+  </Card>
+</CardGroup>
+
+## Email Notifications
+
+Accessories can trigger notifications:
+- **Checkout confirmation** - When accessory is assigned
+- **Check-in confirmation** - When accessory is returned
+- **Low stock alerts** - When quantity drops below minimum
+- **User acceptance** - If category requires acceptance
+
+<Note>
+Email settings are configured at the category level and globally in settings.
+</Note>
+
+## Location Tracking
+
+Assign accessories to locations:
+- Default storage location
+- Where to find/return items
+- Multi-location inventory
+- Location-based reporting
+
+## Company Assignment
+
+For multi-company deployments:
+- Assign accessories to specific companies
+- Enforce company boundaries
+- Company-specific reporting
+- Separate inventory pools
+
+## Cost Tracking
+
+### Total Cost Calculation
+
+```
+Total Value = Purchase Cost × Total Quantity
+```
+
+Track:
+- Per-unit cost
+- Total inventory value
+- Cost per checkout
+- Spend by category
+
+### Financial Reporting
+
+- Accessory spend by time period
+- Cost by department/company
+- Budget vs. actual
+- Trend analysis
+
+## Image Support
+
+Add images to accessories:
+- Upload product photo
+- Shows in listings and detail view
+- Helps users identify correct item
+- Inherits category image if none set
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Naming Convention">
+    Use descriptive names including brand and model: "Logitech MX Master 3 Mouse" instead of just "Mouse".
+  </Accordion>
+  
+  <Accordion title="Minimum Quantities">
+    Set minimums at 2-3× your typical monthly usage to avoid stockouts.
+  </Accordion>
+  
+  <Accordion title="Regular Audits">
+    Periodically verify physical count matches system count, especially for high-value accessories.
+  </Accordion>
+  
+  <Accordion title="Purchase Tracking">
+    Always record purchase cost and supplier to track spending and reorder from reliable sources.
+  </Accordion>
+  
+  <Accordion title="User Returns">
+    Require users to return accessories when they leave or change roles.
+  </Accordion>
+  
+  <Accordion title="Model Numbers">
+    Include model numbers to distinguish between similar accessories (e.g., different USB-C cable types).
+  </Accordion>
+</AccordionGroup>
+
+## Common Use Cases
+
+### New Employee Onboarding
+
+1. Create checkout request for standard accessory kit
+2. Assign keyboard, mouse, headset
+3. User accepts items
+4. Inventory automatically updated
+
+### Device Bundling
+
+1. Check out laptop to user (asset)
+2. Check out charger to same laptop (accessory to asset)
+3. Both items tracked together
+4. Both returned when user leaves
+
+### Spare Parts Pool
+
+1. Maintain quantity of common items
+2. Set minimum quantities
+3. Reorder when low
+4. Check out for temporary/replacement use
+
+## Limitations
+
+<Warning>
+Accessories are designed for quantity tracking. If you need to track items individually with serial numbers, use Assets instead.
+</Warning>
+
+Accessories cannot:
+- Have individual serial numbers
+- Be depreciated
+- Have warranty tracking per unit
+- Support checkout to locations (only users/assets)
+- Have individual maintenance records
+
+## Related Features
+
+- [Assets](/features/assets) - For items requiring individual tracking
+- [Components](/features/components) - For parts installed in assets
+- [Consumables](/features/consumables) - For items that are consumed/not returned
+- [Users](/features/users) - Assign accessories to people

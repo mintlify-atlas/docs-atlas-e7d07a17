@@ -1,0 +1,843 @@
+---
+title: Installation Guide
+description: Comprehensive installation instructions for all platforms and deployment methods
+---
+
+## Installation Methods
+
+Snipe-IT can be installed using several methods. Choose the one that best fits your environment:
+
+<CardGroup cols={2}>
+  <Card title="Docker" icon="docker" href="#docker-installation">
+    Recommended - Easiest setup and maintenance
+  </Card>
+  <Card title="Manual Installation" icon="server" href="#manual-installation">
+    Full control - Ubuntu, Debian, CentOS, RHEL
+  </Card>
+  <Card title="Shared Hosting" icon="cloud" href="#shared-hosting">
+    cPanel, Plesk, and other shared hosts
+  </Card>
+  <Card title="Cloud Platforms" icon="cloud-arrow-up" href="#cloud-platforms">
+    AWS, Azure, DigitalOcean, etc.
+  </Card>
+</CardGroup>
+
+## System Requirements
+
+Before installing, ensure your system meets these requirements:
+
+### PHP Requirements
+
+<Note>
+Snipe-IT requires **PHP 8.2** or later. The application is built on Laravel 11.
+</Note>
+
+**Required PHP Extensions:**
+- `php-curl` - cURL support
+- `php-fileinfo` - File information
+- `php-gd` or `php-imagick` - Image processing
+- `php-iconv` - Character encoding conversion
+- `php-json` - JSON support
+- `php-mbstring` - Multibyte string support
+- `php-mysql` or `php-pgsql` - Database driver
+- `php-pdo` - PDO database support
+- `php-xml` - XML support
+- `php-zip` - ZIP archive support
+- `php-bcmath` - Precision math
+
+**Optional Extensions:**
+- `php-ldap` - LDAP/Active Directory integration
+- `php-redis` - Redis caching support
+- `php-memcached` - Memcached support
+
+### Database Requirements
+
+Snipe-IT supports the following databases:
+
+- **MySQL** 5.7 or later
+- **MariaDB** 10.2 or later
+- **PostgreSQL** 9.6 or later (experimental)
+
+### Web Server
+
+- **Apache** 2.4+ with `mod_rewrite` enabled
+- **Nginx** 1.18+ with PHP-FPM
+
+### System Resources
+
+**Minimum Requirements:**
+- 1 CPU core
+- 2GB RAM
+- 5GB disk space
+
+**Recommended for Production:**
+- 2+ CPU cores
+- 4GB+ RAM
+- 20GB+ disk space (depending on uploads)
+
+---
+
+## Docker Installation
+
+<Tip>
+Docker is the recommended installation method for most users. It provides isolation, easy updates, and consistent environments.
+</Tip>
+
+### Using Docker Compose (Recommended)
+
+<Steps>
+  <Step title="Install Docker">
+    Install Docker and Docker Compose on your system:
+
+    <CodeGroup>
+    ```bash Ubuntu/Debian
+    # Install Docker
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sudo sh get-docker.sh
+
+    # Install Docker Compose
+    sudo apt-get update
+    sudo apt-get install docker-compose-plugin
+
+    # Add your user to docker group
+    sudo usermod -aG docker $USER
+    newgrp docker
+    ```
+
+    ```bash CentOS/RHEL
+    # Install Docker
+    sudo yum install -y yum-utils
+    sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    sudo yum install docker-ce docker-ce-cli containerd.io
+
+    # Start Docker
+    sudo systemctl start docker
+    sudo systemctl enable docker
+
+    # Add your user to docker group
+    sudo usermod -aG docker $USER
+    ```
+
+    ```bash macOS
+    # Install Docker Desktop
+    brew install --cask docker
+
+    # Or download from:
+    # https://www.docker.com/products/docker-desktop
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Create Project Structure">
+    Create a directory for Snipe-IT:
+
+    ```bash
+    mkdir -p /opt/snipe-it
+    cd /opt/snipe-it
+    ```
+  </Step>
+
+  <Step title="Create docker-compose.yml">
+    Create the Docker Compose configuration:
+
+    ```yaml docker-compose.yml
+    volumes:
+      db_data:
+      storage:
+
+    services:
+      app:
+        image: snipe/snipe-it:latest
+        restart: unless-stopped
+        volumes:
+          - storage:/var/lib/snipeit
+        ports:
+          - "80:80"
+          - "443:443"
+        depends_on:
+          db:
+            condition: service_healthy
+            restart: true
+        env_file:
+          - .env
+
+      db:
+        image: mariadb:11.4.7
+        restart: unless-stopped
+        volumes:
+          - db_data:/var/lib/mysql
+        environment:
+          MYSQL_DATABASE: ${DB_DATABASE}
+          MYSQL_USER: ${DB_USERNAME}
+          MYSQL_PASSWORD: ${DB_PASSWORD}
+          MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        healthcheck:
+          test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+          interval: 5s
+          timeout: 1s
+          retries: 5
+    ```
+  </Step>
+
+  <Step title="Configure Environment Variables">
+    Create your `.env` configuration file. Below are the key settings:
+
+    ```bash .env
+    # --------------------------------------------
+    # REQUIRED: BASIC APP SETTINGS
+    # --------------------------------------------
+    APP_ENV=production
+    APP_DEBUG=false
+    APP_KEY=
+    APP_URL=https://assets.yourcompany.com
+    APP_TIMEZONE=America/New_York
+    APP_LOCALE=en-US
+    MAX_RESULTS=500
+
+    # --------------------------------------------
+    # REQUIRED: DATABASE SETTINGS
+    # --------------------------------------------
+    DB_CONNECTION=mysql
+    DB_HOST=db
+    DB_PORT=3306
+    DB_DATABASE=snipeit
+    DB_USERNAME=snipeit
+    DB_PASSWORD=CHANGE_ME_SECURE_PASSWORD
+    MYSQL_ROOT_PASSWORD=CHANGE_ME_ROOT_PASSWORD
+    DB_PREFIX=
+    DB_CHARSET=utf8mb4
+    DB_COLLATION=utf8mb4_unicode_ci
+
+    # --------------------------------------------
+    # REQUIRED: FILE STORAGE SETTINGS
+    # --------------------------------------------
+    PRIVATE_FILESYSTEM_DISK=local
+    PUBLIC_FILESYSTEM_DISK=local_public
+
+    # --------------------------------------------
+    # REQUIRED: MAIL SERVER SETTINGS
+    # --------------------------------------------
+    MAIL_MAILER=smtp
+    MAIL_HOST=smtp.gmail.com
+    MAIL_PORT=587
+    MAIL_USERNAME=your_email@gmail.com
+    MAIL_PASSWORD=your_app_password
+    MAIL_FROM_ADDR=noreply@yourcompany.com
+    MAIL_FROM_NAME='Snipe-IT Asset Management'
+    MAIL_REPLYTO_ADDR=it-support@yourcompany.com
+    MAIL_REPLYTO_NAME='IT Support'
+    MAIL_TLS_VERIFY_PEER=true
+
+    # --------------------------------------------
+    # REQUIRED: IMAGE LIBRARY
+    # --------------------------------------------
+    IMAGE_LIB=gd
+
+    # --------------------------------------------
+    # OPTIONAL: SESSION SETTINGS
+    # --------------------------------------------
+    SESSION_DRIVER=file
+    SESSION_LIFETIME=12000
+    COOKIE_NAME=snipeit_session
+    SECURE_COOKIES=true
+
+    # --------------------------------------------
+    # OPTIONAL: CACHE SETTINGS
+    # --------------------------------------------
+    CACHE_DRIVER=file
+    QUEUE_DRIVER=sync
+
+    # --------------------------------------------
+    # OPTIONAL: SECURITY SETTINGS
+    # --------------------------------------------
+    APP_FORCE_TLS=true
+    ENABLE_CSP=true
+    ENABLE_HSTS=true
+    REFERRER_POLICY=same-origin
+    ALLOW_IFRAMING=false
+
+    # --------------------------------------------
+    # OPTIONAL: LOGIN THROTTLING
+    # --------------------------------------------
+    LOGIN_MAX_ATTEMPTS=5
+    LOGIN_LOCKOUT_DURATION=60
+
+    # --------------------------------------------
+    # OPTIONAL: API SETTINGS
+    # --------------------------------------------
+    API_THROTTLE_PER_MINUTE=120
+    API_TOKEN_EXPIRATION_YEARS=15
+
+    # --------------------------------------------
+    # OPTIONAL: BACKUP SETTINGS
+    # --------------------------------------------
+    BACKUP_ENV=true
+    ALLOW_BACKUP_DELETE=false
+    ```
+
+    <Warning>
+    **Security Notice**: 
+    - Change all default passwords
+    - Generate a secure `APP_KEY` (done automatically in next step)
+    - Use HTTPS in production (`APP_FORCE_TLS=true`)
+    - Enable security headers for production
+    </Warning>
+  </Step>
+
+  <Step title="Start the Application">
+    Launch the containers:
+
+    ```bash
+    docker-compose up -d
+    ```
+  </Step>
+
+  <Step title="Generate Application Key">
+    Generate the encryption key:
+
+    ```bash
+    docker-compose exec app php artisan key:generate
+    ```
+  </Step>
+
+  <Step title="Complete Web Setup">
+    Access your Snipe-IT instance at `http://your-server-ip` and complete the setup wizard.
+  </Step>
+</Steps>
+
+### Using Pre-built Docker Image
+
+Run Snipe-IT with a single command:
+
+```bash
+docker run -d \
+  --name snipe-it \
+  -p 80:80 \
+  -e APP_ENV=production \
+  -e APP_DEBUG=false \
+  -e APP_KEY=<your-generated-key> \
+  -e APP_URL=http://localhost \
+  -e DB_HOST=db.yourserver.com \
+  -e DB_DATABASE=snipeit \
+  -e DB_USERNAME=snipeit \
+  -e DB_PASSWORD=yourpassword \
+  -v snipeit-storage:/var/lib/snipeit \
+  snipe/snipe-it:latest
+```
+
+---
+
+## Manual Installation
+
+<Warning>
+Manual installation requires more system administration knowledge. Docker is recommended for most users.
+</Warning>
+
+### Ubuntu 24.04 / Debian 12
+
+<Steps>
+  <Step title="Update System">
+    ```bash
+    sudo apt-get update
+    sudo apt-get upgrade -y
+    ```
+  </Step>
+
+  <Step title="Install PHP 8.3 and Extensions">
+    ```bash
+    sudo apt-get install -y \
+      php8.3 \
+      php8.3-cli \
+      php8.3-fpm \
+      php8.3-mysql \
+      php8.3-curl \
+      php8.3-gd \
+      php8.3-ldap \
+      php8.3-mbstring \
+      php8.3-xml \
+      php8.3-zip \
+      php8.3-bcmath \
+      php8.3-redis
+    ```
+  </Step>
+
+  <Step title="Install MySQL/MariaDB">
+    ```bash
+    # Install MariaDB
+    sudo apt-get install -y mariadb-server mariadb-client
+
+    # Secure installation
+    sudo mysql_secure_installation
+
+    # Create database and user
+    sudo mysql -e "CREATE DATABASE snipeit CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    sudo mysql -e "CREATE USER 'snipeit'@'localhost' IDENTIFIED BY 'YourSecurePassword';"
+    sudo mysql -e "GRANT ALL PRIVILEGES ON snipeit.* TO 'snipeit'@'localhost';"
+    sudo mysql -e "FLUSH PRIVILEGES;"
+    ```
+  </Step>
+
+  <Step title="Install Apache">
+    ```bash
+    sudo apt-get install -y apache2 libapache2-mod-php8.3
+
+    # Enable required modules
+    sudo a2enmod rewrite
+    sudo a2enmod ssl
+    sudo systemctl restart apache2
+    ```
+  </Step>
+
+  <Step title="Install Composer">
+    ```bash
+    curl -sS https://getcomposer.org/installer | php
+    sudo mv composer.phar /usr/local/bin/composer
+    sudo chmod +x /usr/local/bin/composer
+    ```
+  </Step>
+
+  <Step title="Download Snipe-IT">
+    ```bash
+    cd /var/www
+    sudo git clone https://github.com/grokability/snipe-it snipe-it
+    cd snipe-it
+    sudo git checkout master
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    ```bash
+    sudo composer install --no-dev --prefer-source
+    ```
+  </Step>
+
+  <Step title="Configure Permissions">
+    ```bash
+    sudo chown -R www-data:www-data /var/www/snipe-it
+    sudo chmod -R 755 /var/www/snipe-it/storage
+    sudo chmod -R 755 /var/www/snipe-it/public/uploads
+    ```
+  </Step>
+
+  <Step title="Configure Environment">
+    ```bash
+    sudo cp /var/www/snipe-it/.env.example /var/www/snipe-it/.env
+    sudo nano /var/www/snipe-it/.env
+    ```
+
+    Update the database settings:
+    ```bash
+    DB_HOST=localhost
+    DB_DATABASE=snipeit
+    DB_USERNAME=snipeit
+    DB_PASSWORD=YourSecurePassword
+    ```
+  </Step>
+
+  <Step title="Generate Application Key">
+    ```bash
+    sudo php artisan key:generate
+    ```
+  </Step>
+
+  <Step title="Configure Apache Virtual Host">
+    Create `/etc/apache2/sites-available/snipe-it.conf`:
+
+    ```apache
+    <VirtualHost *:80>
+        ServerName assets.yourcompany.com
+        DocumentRoot /var/www/snipe-it/public
+
+        <Directory /var/www/snipe-it/public>
+            Options Indexes FollowSymLinks
+            AllowOverride All
+            Require all granted
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/snipeit_error.log
+        CustomLog ${APACHE_LOG_DIR}/snipeit_access.log combined
+    </VirtualHost>
+    ```
+
+    Enable the site:
+    ```bash
+    sudo a2ensite snipe-it
+    sudo a2dissite 000-default
+    sudo systemctl reload apache2
+    ```
+  </Step>
+
+  <Step title="Complete Web Setup">
+    Navigate to `http://your-server-ip` and complete the setup wizard.
+  </Step>
+</Steps>
+
+### CentOS/RHEL 9
+
+<Steps>
+  <Step title="Enable EPEL and Remi Repositories">
+    ```bash
+    sudo dnf install -y epel-release
+    sudo dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm
+    sudo dnf module reset php
+    sudo dnf module enable php:remi-8.3
+    ```
+  </Step>
+
+  <Step title="Install PHP and Extensions">
+    ```bash
+    sudo dnf install -y \
+      php \
+      php-cli \
+      php-fpm \
+      php-mysqlnd \
+      php-curl \
+      php-gd \
+      php-ldap \
+      php-mbstring \
+      php-xml \
+      php-zip \
+      php-bcmath \
+      php-json
+    ```
+  </Step>
+
+  <Step title="Install and Configure MariaDB">
+    ```bash
+    sudo dnf install -y mariadb-server
+    sudo systemctl start mariadb
+    sudo systemctl enable mariadb
+    sudo mysql_secure_installation
+    ```
+  </Step>
+
+  <Step title="Install Apache">
+    ```bash
+    sudo dnf install -y httpd
+    sudo systemctl start httpd
+    sudo systemctl enable httpd
+
+    # Configure firewall
+    sudo firewall-cmd --permanent --add-service=http
+    sudo firewall-cmd --permanent --add-service=https
+    sudo firewall-cmd --reload
+    ```
+  </Step>
+
+  <Step title="Follow Ubuntu Steps 5-11">
+    Continue with steps 5-11 from the Ubuntu installation, adjusting paths and commands as needed for RHEL.
+  </Step>
+</Steps>
+
+---
+
+## Shared Hosting Installation
+
+For shared hosting environments (cPanel, Plesk, etc.):
+
+<Warning>
+Shared hosting has limitations. Ensure your host meets the PHP 8.2+ requirement and allows SSH access or provides Composer.
+</Warning>
+
+<Steps>
+  <Step title="Create Database">
+    Use your hosting control panel to create:
+    - A MySQL database
+    - A database user with all privileges
+  </Step>
+
+  <Step title="Upload Files">
+    Download the latest release from GitHub and upload via FTP/SFTP to your hosting directory.
+  </Step>
+
+  <Step title="Configure .env File">
+    Rename `.env.example` to `.env` and update database credentials.
+  </Step>
+
+  <Step title="Install Dependencies">
+    If SSH access is available:
+    ```bash
+    composer install --no-dev
+    php artisan key:generate
+    ```
+
+    If no SSH access, use your host's PHP selector to run composer commands.
+  </Step>
+
+  <Step title="Set Document Root">
+    Point your domain's document root to the `public` directory.
+  </Step>
+</Steps>
+
+---
+
+## Cloud Platforms
+
+### AWS EC2
+
+Snipe-IT can run on AWS EC2 instances:
+
+1. Launch an Ubuntu 24.04 EC2 instance (t3.small or larger)
+2. Configure security groups to allow HTTP/HTTPS
+3. Follow the Ubuntu manual installation steps
+4. Use RDS for MySQL (recommended for production)
+5. Use S3 for file storage (configure in `.env`)
+
+### DigitalOcean
+
+1. Create a Droplet with Ubuntu 24.04
+2. Follow the Ubuntu installation steps
+3. Use DigitalOcean Managed Databases for MySQL
+4. Use Spaces for object storage
+
+### Azure
+
+1. Create an Ubuntu VM
+2. Configure Network Security Group for HTTP/HTTPS
+3. Follow Ubuntu installation steps
+4. Use Azure Database for MySQL
+5. Use Azure Blob Storage for uploads
+
+---
+
+## Environment Variables Reference
+
+Here are the most important environment variables from `/home/daytona/workspace/source/.env.example:1-240`:
+
+### Application Settings
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `APP_ENV` | `production` | Application environment |
+| `APP_DEBUG` | `false` | Enable debug mode (never in production!) |
+| `APP_KEY` | - | Encryption key (auto-generated) |
+| `APP_URL` | `null` | Your application URL |
+| `APP_TIMEZONE` | `UTC` | Application timezone |
+| `APP_LOCALE` | `en-US` | Default language |
+| `MAX_RESULTS` | `500` | Maximum API results per request |
+
+### Database Settings
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_CONNECTION` | `mysql` | Database type (mysql/pgsql) |
+| `DB_HOST` | `127.0.0.1` | Database host |
+| `DB_PORT` | `3306` | Database port |
+| `DB_DATABASE` | `null` | Database name |
+| `DB_USERNAME` | `null` | Database username |
+| `DB_PASSWORD` | `null` | Database password |
+| `DB_CHARSET` | `utf8mb4` | Character set |
+| `DB_COLLATION` | `utf8mb4_unicode_ci` | Collation |
+
+### Mail Settings
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MAIL_MAILER` | `smtp` | Mail driver |
+| `MAIL_HOST` | - | SMTP server hostname |
+| `MAIL_PORT` | `587` | SMTP port |
+| `MAIL_USERNAME` | - | SMTP username |
+| `MAIL_PASSWORD` | - | SMTP password |
+| `MAIL_FROM_ADDR` | - | From email address |
+| `MAIL_FROM_NAME` | `Snipe-IT` | From name |
+
+---
+
+## Post-Installation Configuration
+
+### Set Up Scheduled Tasks
+
+Snipe-IT requires a cron job for scheduled tasks (notifications, backups, etc.):
+
+<CodeGroup>
+```bash Docker
+# Cron is automatically configured in the Docker image
+# No action needed
+```
+
+```bash Manual Installation
+# Add to crontab
+sudo crontab -e -u www-data
+
+# Add this line:
+* * * * * /usr/bin/php /var/www/snipe-it/artisan schedule:run >> /dev/null 2>&1
+```
+</CodeGroup>
+
+### Configure File Permissions
+
+Ensure proper permissions for uploads and cache:
+
+```bash
+# For Apache
+sudo chown -R www-data:www-data storage public/uploads
+sudo chmod -R 755 storage public/uploads
+
+# For Nginx
+sudo chown -R nginx:nginx storage public/uploads
+sudo chmod -R 755 storage public/uploads
+```
+
+### Enable SSL/HTTPS
+
+For production environments, always use HTTPS:
+
+<CodeGroup>
+```bash Let's Encrypt (Certbot)
+sudo apt-get install certbot python3-certbot-apache
+sudo certbot --apache -d assets.yourcompany.com
+```
+
+```bash Docker with SSL
+# Mount SSL certificates
+volumes:
+  - ./ssl/cert.pem:/var/lib/snipeit/ssl/snipeit-ssl.crt
+  - ./ssl/key.pem:/var/lib/snipeit/ssl/snipeit-ssl.key
+```
+</CodeGroup>
+
+---
+
+## Troubleshooting Common Issues
+
+<Accordion title="500 Internal Server Error">
+  **Causes:**
+  - Incorrect file permissions
+  - Missing .env file
+  - Invalid APP_KEY
+
+  **Solutions:**
+  ```bash
+  # Check permissions
+  sudo chown -R www-data:www-data /var/www/snipe-it
+  sudo chmod -R 755 /var/www/snipe-it/storage
+
+  # Regenerate app key
+  php artisan key:generate
+
+  # Check Apache error logs
+  sudo tail -f /var/log/apache2/error.log
+  ```
+</Accordion>
+
+<Accordion title="Database Connection Failed">
+  **Check:**
+  1. Database server is running
+  2. Credentials in `.env` are correct
+  3. Database user has proper privileges
+  4. Firewall allows database connection
+
+  **Test connection:**
+  ```bash
+  mysql -h DB_HOST -u DB_USERNAME -p
+  ```
+</Accordion>
+
+<Accordion title="Blank Page After Login">
+  **Common causes:**
+  - Cache issues
+  - Session configuration
+
+  **Solutions:**
+  ```bash
+  php artisan cache:clear
+  php artisan config:clear
+  php artisan view:clear
+  ```
+</Accordion>
+
+<Accordion title="Upload Errors">
+  **Check:**
+  - Directory permissions
+  - PHP upload limits
+
+  **Fix PHP limits in `php.ini`:**
+  ```ini
+  upload_max_filesize = 100M
+  post_max_size = 100M
+  memory_limit = 256M
+  max_execution_time = 300
+  ```
+</Accordion>
+
+<Accordion title="Email Not Sending">
+  **Verify:**
+  1. SMTP credentials are correct
+  2. Firewall allows outbound SMTP
+  3. Mail server requires TLS
+
+  **Test email:**
+  ```bash
+  php artisan snipeit:test-email youremail@example.com
+  ```
+</Accordion>
+
+---
+
+## Performance Optimization
+
+### Enable Caching
+
+For production environments, use Redis or Memcached:
+
+```bash .env
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+```
+
+### Optimize Composer Autoloader
+
+```bash
+composer install --optimize-autoloader --no-dev
+```
+
+### Configure OPcache
+
+Add to `php.ini`:
+
+```ini
+opcache.enable=1
+opcache.memory_consumption=128
+opcache.max_accelerated_files=10000
+opcache.revalidate_freq=2
+```
+
+---
+
+## Next Steps
+
+<CardGroup cols={3}>
+  <Card title="User Management" icon="users">
+    Set up users, groups, and permissions
+  </Card>
+  <Card title="Asset Categories" icon="folder-tree">
+    Create categories and custom fields
+  </Card>
+  <Card title="API Access" icon="code">
+    Generate API tokens for integrations
+  </Card>
+  <Card title="LDAP/SAML" icon="shield-halved">
+    Configure enterprise authentication
+  </Card>
+  <Card title="Backups" icon="database">
+    Set up automated backups
+  </Card>
+  <Card title="Customization" icon="palette">
+    Customize branding and email templates
+  </Card>
+</CardGroup>
+
+## Getting Help
+
+If you encounter issues:
+
+- **[Common Issues Guide](https://snipe-it.readme.io/docs/common-issues)** - Known problems and solutions
+- **[Discord Community](https://discord.gg/yZFtShAcKk)** - Live help from community
+- **[GitHub Issues](https://github.com/grokability/snipe-it/issues)** - Search existing issues
+- **[Official Documentation](https://snipe-it.readme.io/)** - Complete documentation
+
+<Info>
+Before asking for help, search the [GitHub issues](https://github.com/grokability/snipe-it/issues) (both open and closed) and the [Discord server](https://discord.gg/yZFtShAcKk) - your question may already be answered!
+</Info>

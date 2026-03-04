@@ -1,0 +1,337 @@
+---
+title: 'Licenses'
+description: 'Manage software licenses via the API'
+---
+
+The Licenses API allows you to manage software licenses and their seats in Snipe-IT.
+
+## List Licenses
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/licenses" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField query="limit" type="integer" default="50">
+  Number of results to return
+</ParamField>
+
+<ParamField query="offset" type="integer" default="0">
+  Offset for pagination
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search string to filter results
+</ParamField>
+
+<ParamField query="sort" type="string" default="created_at">
+  Column to sort by. Allowed values: `id`, `name`, `purchase_cost`, `expiration_date`, `purchase_order`, `order_number`, `notes`, `purchase_date`, `serial`, `seats`, `free_seats_count`
+</ParamField>
+
+<ParamField query="order" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status: `active`, `inactive`, `expiring`
+</ParamField>
+
+<ParamField query="company_id" type="integer">
+  Filter by company ID
+</ParamField>
+
+<ParamField query="manufacturer_id" type="integer">
+  Filter by manufacturer ID
+</ParamField>
+
+<ParamField query="supplier_id" type="integer">
+  Filter by supplier ID
+</ParamField>
+
+<ParamField query="category_id" type="integer">
+  Filter by category ID
+</ParamField>
+
+<ParamField query="depreciation_id" type="integer">
+  Filter by depreciation ID
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total number of licenses
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  Array of license objects
+  <Expandable title="License Object">
+    <ResponseField name="id" type="integer">
+      License ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      License name
+    </ResponseField>
+    <ResponseField name="product_key" type="string">
+      Product key/serial
+    </ResponseField>
+    <ResponseField name="seats" type="integer">
+      Total number of seats
+    </ResponseField>
+    <ResponseField name="free_seats_count" type="integer">
+      Number of available seats
+    </ResponseField>
+    <ResponseField name="license_name" type="string">
+      Licensee name
+    </ResponseField>
+    <ResponseField name="license_email" type="string">
+      Licensee email
+    </ResponseField>
+    <ResponseField name="purchase_order" type="string">
+      Purchase order number
+    </ResponseField>
+    <ResponseField name="order_number" type="string">
+      Order number
+    </ResponseField>
+    <ResponseField name="purchase_date" type="string">
+      Purchase date
+    </ResponseField>
+    <ResponseField name="purchase_cost" type="string">
+      Purchase cost
+    </ResponseField>
+    <ResponseField name="expiration_date" type="string">
+      Expiration date
+    </ResponseField>
+    <ResponseField name="termination_date" type="string">
+      Termination date
+    </ResponseField>
+    <ResponseField name="maintained" type="boolean">
+      Whether license is maintained
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      License notes
+    </ResponseField>
+    <ResponseField name="company" type="object">
+      Company information
+    </ResponseField>
+    <ResponseField name="manufacturer" type="object">
+      Manufacturer information
+    </ResponseField>
+    <ResponseField name="supplier" type="object">
+      Supplier information
+    </ResponseField>
+    <ResponseField name="category" type="object">
+      Category information
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Get License by ID
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/licenses/{license_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="license_id" type="integer" required>
+  The license ID
+</ParamField>
+
+## Create License
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://your-domain.com/api/v1/licenses" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Adobe Creative Cloud",
+    "seats": 10,
+    "category_id": 1,
+    "manufacturer_id": 5
+  }'
+```
+</CodeGroup>
+
+<ParamField body="name" type="string" required>
+  License name
+</ParamField>
+
+<ParamField body="seats" type="integer" required>
+  Number of seats
+</ParamField>
+
+<ParamField body="category_id" type="integer" required>
+  Category ID
+</ParamField>
+
+<ParamField body="company_id" type="integer">
+  Company ID
+</ParamField>
+
+<ParamField body="manufacturer_id" type="integer">
+  Manufacturer ID
+</ParamField>
+
+<ParamField body="product_key" type="string">
+  Product key/serial number
+</ParamField>
+
+<ParamField body="order_number" type="string">
+  Order number
+</ParamField>
+
+<ParamField body="purchase_order" type="string">
+  Purchase order number
+</ParamField>
+
+<ParamField body="purchase_date" type="string">
+  Purchase date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="purchase_cost" type="number">
+  Purchase cost
+</ParamField>
+
+<ParamField body="expiration_date" type="string">
+  Expiration date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="license_name" type="string">
+  Licensee name
+</ParamField>
+
+<ParamField body="license_email" type="string">
+  Licensee email
+</ParamField>
+
+<ParamField body="maintained" type="boolean">
+  Whether license is maintained
+</ParamField>
+
+<ParamField body="supplier_id" type="integer">
+  Supplier ID
+</ParamField>
+
+<ParamField body="notes" type="string">
+  License notes
+</ParamField>
+
+## Update License
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH "https://your-domain.com/api/v1/licenses/{license_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated License Name",
+    "seats": 15
+  }'
+```
+</CodeGroup>
+
+<ParamField path="license_id" type="integer" required>
+  The license ID
+</ParamField>
+
+## Delete License
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://your-domain.com/api/v1/licenses/{license_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="license_id" type="integer" required>
+  The license ID
+</ParamField>
+
+## List License Seats
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/licenses/{license_id}/seats" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="license_id" type="integer" required>
+  The license ID
+</ParamField>
+
+Returns all seats for a specific license, including assigned and available seats.
+
+## Get License Seat
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://your-domain.com/api/v1/licenses/{license_id}/seats/{seat_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json"
+```
+</CodeGroup>
+
+<ParamField path="license_id" type="integer" required>
+  The license ID
+</ParamField>
+
+<ParamField path="seat_id" type="integer" required>
+  The seat ID
+</ParamField>
+
+## Update License Seat
+
+Used to checkout or checkin a license seat.
+
+<CodeGroup>
+```bash Checkout
+curl -X PATCH "https://your-domain.com/api/v1/licenses/{license_id}/seats/{seat_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "assigned_to": 123,
+    "note": "Assigned to employee"
+  }'
+```
+
+```bash Checkin
+curl -X PATCH "https://your-domain.com/api/v1/licenses/{license_id}/seats/{seat_id}" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "assigned_to": null,
+    "note": "License returned"
+  }'
+```
+</CodeGroup>
+
+<ParamField path="license_id" type="integer" required>
+  The license ID
+</ParamField>
+
+<ParamField path="seat_id" type="integer" required>
+  The seat ID
+</ParamField>
+
+<ParamField body="assigned_to" type="integer">
+  User ID to assign seat to (set to null to checkin)
+</ParamField>
+
+<ParamField body="asset_id" type="integer">
+  Asset ID to associate with this seat
+</ParamField>
+
+<ParamField body="note" type="string">
+  Checkout/checkin note
+</ParamField>

@@ -1,0 +1,623 @@
+---
+title: Security
+description: Configure authentication, two-factor authentication, API tokens, CSRF protection, and security headers
+---
+
+Snipe-IT provides comprehensive security features to protect your asset management data. This page covers authentication mechanisms, access control, and security hardening.
+
+## Authentication Methods
+
+Snipe-IT supports multiple authentication methods:
+
+- **Local Authentication** - Built-in username/password authentication
+- **LDAP/Active Directory** - Integration with directory services
+- **SAML 2.0** - Single Sign-On with enterprise identity providers
+- **Two-Factor Authentication (2FA)** - TOTP-based second factor
+
+### Local Authentication
+
+Users are authenticated against the `users` table using Laravel's built-in authentication system (configured in `config/auth.php:16-19`):
+
+```php
+'defaults' => [
+    'guard' => 'web',
+    'passwords' => 'users',
+],
+```
+
+Passwords are hashed using bcrypt by default, with configurable work factor:
+
+```bash .env
+HASHING_DRIVER=bcrypt
+BCRYPT_ROUNDS=10
+```
+
+<Info>
+  Increasing `BCRYPT_ROUNDS` makes password hashing more computationally expensive, providing better protection against brute-force attacks at the cost of slower authentication.
+</Info>
+
+Alternatively, use Argon2 for password hashing:
+
+```bash .env
+HASHING_DRIVER=argon2
+ARGON_MEMORY=1024
+ARGON_THREADS=2
+ARGON_TIME=2
+```
+
+### Login Throttling
+
+Protect against brute-force attacks with login throttling:
+
+```bash .env
+# Maximum login attempts before lockout
+LOGIN_MAX_ATTEMPTS=5
+
+# Lockout duration in seconds
+LOGIN_LOCKOUT_DURATION=60
+
+# Disable autocomplete on login form (security compliance)
+LOGIN_AUTOCOMPLETE=false
+```
+
+<ParamField path="LOGIN_MAX_ATTEMPTS" type="integer" default="5">
+  Number of failed login attempts before the account is temporarily locked.
+</ParamField>
+
+<ParamField path="LOGIN_LOCKOUT_DURATION" type="integer" default="60">
+  Duration in seconds that the account remains locked after exceeding max attempts.
+</ParamField>
+
+<ParamField path="LOGIN_AUTOCOMPLETE" type="boolean" default="false">
+  Enable browser autocomplete on the login form. Set to `false` for security compliance.
+</ParamField>
+
+Throttle configuration is defined in `config/auth.php:101-104`:
+
+```php
+'throttle' => [
+    'max_attempts' => env('LOGIN_MAX_ATTEMPTS', 5),
+    'lockout_duration' => env('LOGIN_LOCKOUT_DURATION', 60),
+]
+```
+
+### Password Reset Security
+
+```bash .env
+# Password reset link expiration (in minutes)
+RESET_PASSWORD_LINK_EXPIRES=15
+
+# Password confirmation timeout (in seconds)
+PASSWORD_CONFIRM_TIMEOUT=10800
+
+# Max password reset attempts per minute
+PASSWORD_RESET_MAX_ATTEMPTS_PER_MIN=50
+
+# Invitation link expiration (in minutes)
+INVITE_PASSWORD_LINK_EXPIRES=1500
+```
+
+<ParamField path="RESET_PASSWORD_LINK_EXPIRES" type="integer" default="15">
+  How many minutes before a password reset link expires (default: 15 minutes).
+</ParamField>
+
+<ParamField path="PASSWORD_CONFIRM_TIMEOUT" type="integer" default="10800">
+  How many seconds before requiring password re-confirmation for sensitive actions (default: 3 hours).
+</ParamField>
+
+<ParamField path="PASSWORD_RESET_MAX_ATTEMPTS_PER_MIN" type="integer" default="50">
+  Rate limit for password reset requests per minute.
+</ParamField>
+
+## Two-Factor Authentication (2FA)
+
+Snipe-IT implements TOTP (Time-based One-Time Password) 2FA using the Google2FA package.
+
+### Enabling 2FA
+
+Two-factor authentication can be:
+1. **Optionally enabled** by individual users
+2. **Enforced globally** for all users (via Settings > Security)
+3. **Enforced for specific users** (via user edit)
+
+### 2FA Configuration
+
+Configure 2FA settings in `.env`:
+
+```bash .env
+# Enable/disable 2FA globally
+OTP_ENABLED=true
+
+# 2FA session lifetime (0 = eternal)
+OTP_LIFETIME=0
+
+# Keep 2FA session alive on new requests
+OTP_KEEP_ALIVE=true
+
+# Throw exceptions on 2FA errors
+OTP_THROW_EXCEPTION=true
+```
+
+These settings are defined in `config/google2fa.php:8-75`.
+
+<ParamField path="OTP_ENABLED" type="boolean" default="true">
+  Master switch for 2FA functionality. Set to `false` to completely disable 2FA.
+</ParamField>
+
+<ParamField path="OTP_LIFETIME" type="integer" default="0">
+  How long (in minutes) before users must re-enter their 2FA code. `0` means eternal - users only authenticate once per session.
+</ParamField>
+
+<ParamField path="OTP_KEEP_ALIVE" type="boolean" default="true">
+  Renew the 2FA session lifetime on each request. When `true`, users stay authenticated as long as they're active.
+</ParamField>
+
+### Setting Up 2FA as a User
+
+1. Click on your name in the top-right corner
+2. Select **Account Settings**
+3. Go to the **Security** tab
+4. Click **Enable Two-Factor Authentication**
+5. Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password, etc.)
+6. Enter the 6-digit code to confirm
+7. Save your recovery codes in a secure location
+
+### Enforcing 2FA for All Users
+
+As an administrator:
+
+1. Navigate to **Settings** > **Security**
+2. Enable **Require Two-Factor Authentication**
+3. Save settings
+
+Users without 2FA enrolled will be redirected to the enrollment page on next login.
+
+### 2FA Implementation Details
+
+The 2FA workflow is implemented in `app/Http/Controllers/Auth/LoginController.php:398-437`:
+
+```php
+public function getTwoFactorAuth()
+{
+    // Display 2FA code entry form
+}
+
+public function postTwoFactorAuth(Request $request)
+{
+    $user = auth()->user();
+    $secret = $request->input('two_factor_secret');
+    
+    if (Google2FA::verifyKey($user->two_factor_secret, $secret)) {
+        // Mark 2FA as verified for this session
+        session(['google2fa' => true]);
+        return redirect()->intended('/');
+    }
+    
+    return redirect()->back()->withErrors(['two_factor_secret' => 'Invalid authentication code']);
+}
+```
+
+### Resetting User 2FA
+
+Administrators can reset a user's 2FA if they lose access to their authenticator:
+
+1. Navigate to **People** > **Users**
+2. Edit the user
+3. Click **Reset Two-Factor Authentication**
+4. Confirm the reset
+
+This action is logged in the activity log (`app/Http/Controllers/Api/UsersController.php:828`).
+
+### 2FA Permissions
+
+Users need the `self.two_factor` permission to manage their own 2FA settings (`config/permissions.php:452-453`):
+
+```php
+[
+    'permission' => 'self.two_factor',
+    'display'    => true,
+],
+```
+
+## API Authentication
+
+Snipe-IT uses Laravel Passport for OAuth2-based API authentication.
+
+### API Token Expiration
+
+```bash .env
+API_TOKEN_EXPIRATION_YEARS=15
+```
+
+<ParamField path="API_TOKEN_EXPIRATION_YEARS" type="integer" default="15">
+  How many years before API personal access tokens expire.
+</ParamField>
+
+Configured in `config/passport.php:16`:
+
+```php
+'expiration_years' => env('API_TOKEN_EXPIRATION_YEARS', 20),
+```
+
+### Generating API Tokens
+
+Users can generate personal API tokens:
+
+1. Go to **Account Settings**
+2. Click the **API Tokens** tab
+3. Click **Create New Token**
+4. Give the token a name (e.g., "Mobile App", "Automation Script")
+5. Copy the token immediately - it won't be shown again
+
+<Warning>
+  API tokens have the same permissions as the user who created them. Create dedicated service accounts with limited permissions for API integrations.
+</Warning>
+
+### Using API Tokens
+
+Include the token in the `Authorization` header:
+
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+     https://snipeit.company.com/api/v1/hardware
+```
+
+### API Rate Limiting
+
+Protect your API from abuse with rate limiting:
+
+```bash .env
+API_THROTTLE_PER_MINUTE=120
+```
+
+<ParamField path="API_THROTTLE_PER_MINUTE" type="integer" default="120">
+  Maximum API requests allowed per minute per IP address.
+</ParamField>
+
+When the limit is exceeded, the API returns a `429 Too Many Requests` response.
+
+### API Token Permissions
+
+The `self.api` permission controls whether users can create their own API tokens (`config/permissions.php:457-459`):
+
+```php
+[
+    'permission' => 'self.api',
+    'display'    => true,
+],
+```
+
+Disable this permission to prevent non-admin users from generating API tokens.
+
+## CSRF Protection
+
+Cross-Site Request Forgery (CSRF) protection is enabled by default for all POST, PUT, PATCH, and DELETE requests.
+
+### CSRF Configuration
+
+The `VerifyCsrfToken` middleware is automatically applied to all web routes (`app/Http/Middleware/VerifyCsrfToken.php`).
+
+<Info>
+  API routes (under `/api/*`) are exempt from CSRF protection as they use token-based authentication.
+</Info>
+
+### CSRF Token in Forms
+
+Blade templates automatically include CSRF tokens:
+
+```php
+<form method="POST" action="/assets">
+    @csrf
+    <!-- form fields -->
+</form>
+```
+
+For AJAX requests, include the token in the request headers:
+
+```javascript
+$.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    }
+});
+```
+
+## Content Security Policy (CSP)
+
+Enable CSP to mitigate XSS attacks:
+
+```bash .env
+# Enable Content Security Policy
+ENABLE_CSP=true
+
+# Additional allowed CSP URLs (comma-separated)
+ADDITIONAL_CSP_URLS=https://fonts.googleapis.com,https://cdn.example.com
+```
+
+<ParamField path="ENABLE_CSP" type="boolean" default="false">
+  Enable Content Security Policy headers. Test thoroughly before enabling in production.
+</ParamField>
+
+<ParamField path="ADDITIONAL_CSP_URLS" type="string">
+  Comma-separated list of additional URLs to whitelist in the CSP policy (e.g., CDNs, external fonts).
+</ParamField>
+
+<Warning>
+  Enabling CSP can break functionality if not configured correctly. Test in a development environment first and add necessary exceptions to `ADDITIONAL_CSP_URLS`.
+</Warning>
+
+## Security Headers
+
+Configure additional security headers:
+
+```bash .env
+# Prevent framing (clickjacking protection)
+ALLOW_IFRAMING=false
+
+# Referrer policy
+REFERRER_POLICY=same-origin
+
+# Enable HTTP Strict Transport Security (HTTPS only)
+ENABLE_HSTS=false
+
+# Trusted proxy IPs (for load balancers)
+APP_TRUSTED_PROXIES=192.168.1.1,10.0.0.1
+
+# CORS allowed origins
+CORS_ALLOWED_ORIGINS=https://app.company.com,https://mobile.company.com
+```
+
+<ParamField path="ALLOW_IFRAMING" type="boolean" default="false">
+  Allow Snipe-IT to be embedded in iframes. Keep `false` to prevent clickjacking attacks.
+</ParamField>
+
+<ParamField path="REFERRER_POLICY" type="string" default="same-origin">
+  Controls how much referrer information is sent with requests. Options: `no-referrer`, `same-origin`, `strict-origin`, etc.
+</ParamField>
+
+<ParamField path="ENABLE_HSTS" type="boolean" default="false">
+  Enable HTTP Strict Transport Security, forcing browsers to only use HTTPS.
+  
+  **Only enable if you have a valid SSL certificate and all traffic is HTTPS.**
+</ParamField>
+
+<ParamField path="APP_TRUSTED_PROXIES" type="string">
+  Comma-separated list of trusted proxy IP addresses (load balancers, reverse proxies).
+  
+  Required for correct IP detection when behind a proxy.
+</ParamField>
+
+<ParamField path="CORS_ALLOWED_ORIGINS" type="string">
+  Comma-separated list of origins allowed to make cross-origin requests to your API.
+</ParamField>
+
+## Session Security
+
+Configure secure session handling:
+
+```bash .env
+# Session driver (file, database, redis, memcached)
+SESSION_DRIVER=file
+
+# Session lifetime (in minutes)
+SESSION_LIFETIME=12000
+
+# Expire session on browser close
+EXPIRE_ON_CLOSE=false
+
+# Encrypt session data
+ENCRYPT=false
+
+# Session cookie name
+COOKIE_NAME=snipeit_session
+
+# Cookie domain (null for current domain)
+COOKIE_DOMAIN=null
+
+# Require HTTPS for cookies (enable in production with SSL)
+SECURE_COOKIES=false
+```
+
+<ParamField path="SESSION_DRIVER" type="string" default="file">
+  Where to store session data. Options: `file`, `database`, `redis`, `memcached`.
+  
+  Use `redis` or `memcached` for multi-server deployments.
+</ParamField>
+
+<ParamField path="SESSION_LIFETIME" type="integer" default="12000">
+  Session lifetime in minutes (12000 = ~8 days).
+</ParamField>
+
+<ParamField path="SECURE_COOKIES" type="boolean" default="false">
+  Only transmit cookies over HTTPS. **Enable this in production with SSL.**
+</ParamField>
+
+<Warning>
+  Set `SECURE_COOKIES=true` when using HTTPS to prevent session hijacking. Do not enable if you don't have SSL configured.
+</Warning>
+
+## Encrypted Custom Fields
+
+Sensitive custom field data can be encrypted at rest:
+
+When creating a custom field, enable the **Encrypt Field** option. The data is encrypted using your `APP_KEY`.
+
+<Warning>
+  **Critical:** If you lose or change your `APP_KEY`, all encrypted data becomes permanently unrecoverable. Store your `APP_KEY` securely and include it in backups.
+</Warning>
+
+Encryption is handled in `app/Models/CustomField.php:389-396`:
+
+```php
+public function isFieldDecryptable($string)
+{
+    if (($this->field_encrypted == '1') && ($string != '')) {
+        return true;
+    }
+    return false;
+}
+```
+
+The permission `assets.view.encrypted_custom_fields` controls who can view encrypted field values.
+
+## Permission System
+
+Snipe-IT uses a granular permission system defined in `config/permissions.php`.
+
+### Permission Structure
+
+Permissions follow the pattern: `{resource}.{action}`
+
+Examples:
+- `assets.view` - View assets
+- `assets.create` - Create assets
+- `assets.edit` - Edit assets  
+- `assets.delete` - Delete assets
+- `assets.checkout` - Checkout assets
+- `assets.checkin` - Checkin assets
+
+### Role Hierarchy
+
+1. **Superuser** - Full access to everything, bypasses all permission checks
+2. **Admin** - Administrative access to most features
+3. **Custom Roles** - Granular permission assignments
+
+### Managing Roles and Permissions
+
+1. Navigate to **People** > **Permissions**
+2. Click **Create New** to create a custom role
+3. Select the specific permissions to grant
+4. Assign users to the role
+
+Or edit a user directly and select their role:
+
+1. Go to **People** > **Users**
+2. Edit the user
+3. Select their **Permission Group**
+4. Save
+
+## Security Best Practices
+
+<Check>
+  **Enable 2FA for all admins** - Require two-factor authentication for all users with administrative permissions.
+</Check>
+
+<Check>
+  **Use strong APP_KEY** - Generate a secure random key using `php artisan key:generate`. Never share or commit your `.env` file.
+</Check>
+
+<Check>
+  **Enable HTTPS** - Always use SSL/TLS in production. Set `SECURE_COOKIES=true` and `APP_FORCE_TLS=true`.
+</Check>
+
+<Check>
+  **Limit API access** - Only grant API token permissions to users who need it. Use service accounts with minimal permissions for integrations.
+</Check>
+
+<Check>
+  **Regular security updates** - Keep Snipe-IT updated to the latest version to receive security patches.
+</Check>
+
+<Check>
+  **Audit user permissions** - Regularly review user roles and permissions to ensure least privilege access.
+</Check>
+
+<Check>
+  **Monitor login attempts** - Review failed login attempts in the activity log to detect potential attacks.
+</Check>
+
+<Check>
+  **Backup encryption keys** - Include `.env` in your backup strategy (stored securely!) to ensure you can recover encrypted data.
+</Check>
+
+## SAML Authentication
+
+For enterprise Single Sign-On:
+
+```bash .env
+# Require SAML authentication (disable local login)
+REQUIRE_SAML=false
+
+# SAML key size
+SAML_KEY_SIZE=2048
+```
+
+<ParamField path="REQUIRE_SAML" type="boolean" default="false">
+  When enabled, all users must authenticate via SAML. Local authentication is disabled.
+</ParamField>
+
+SAML configuration is done through the web interface at **Settings** > **SAML**.
+
+## Application Security
+
+### Force TLS/HTTPS
+
+```bash .env
+# Force all requests to use HTTPS
+APP_FORCE_TLS=false
+
+# Allow connections to hosts with invalid/self-signed certificates (dev only!)
+APP_ALLOW_INSECURE_HOSTS=false
+```
+
+<ParamField path="APP_FORCE_TLS" type="boolean" default="false">
+  Redirect all HTTP requests to HTTPS. Only enable if SSL is properly configured.
+</ParamField>
+
+<ParamField path="APP_ALLOW_INSECURE_HOSTS" type="boolean" default="false">
+  Allow insecure SSL connections (self-signed certificates). **Never enable in production.**
+</ParamField>
+
+### Application Lock
+
+```bash .env
+# Lock the application (maintenance mode)
+APP_LOCKED=false
+```
+
+When `true`, the application is locked and shows a maintenance page to all users except super admins.
+
+## Troubleshooting
+
+### "CSRF Token Mismatch" Error
+
+Causes:
+- Session expired
+- Session driver misconfigured  
+- Proxy/load balancer not forwarding headers correctly
+
+Solution:
+- Add proxy IPs to `APP_TRUSTED_PROXIES`
+- Check session configuration
+- Clear browser cookies
+
+### Users Can't Enable 2FA
+
+Check:
+- `OTP_ENABLED=true` in `.env`
+- User has `self.two_factor` permission
+- Server time is synchronized (TOTP is time-based)
+
+### API Returns 401 Unauthorized
+
+Verify:
+- Token is included in `Authorization: Bearer {token}` header
+- Token hasn't expired
+- User account is active and not locked
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/admin/configuration">
+    Configure environment and application settings
+  </Card>
+  <Card title="Backups" icon="database" href="/admin/backups">
+    Set up secure backup procedures
+  </Card>
+  <Card title="Users" icon="users" href="/features/users">
+    Manage users and permissions
+  </Card>
+  <Card title="API Documentation" icon="code" href="/integration/api-overview">
+    Secure API integration guide
+  </Card>
+</CardGroup>

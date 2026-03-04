@@ -1,0 +1,417 @@
+---
+title: Locations
+description: Organize assets, users, and inventory by physical location with hierarchical structure and manager assignment
+icon: location-dot
+---
+
+## Overview
+
+Locations represent physical places where assets, users, and inventory are located. They support hierarchical structures (parent-child relationships), have dedicated managers, and help organize your entire asset ecosystem geographically.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Hierarchical Structure" icon="diagram-nested">
+    Create location trees: Country → Region → Building → Floor → Room.
+  </Card>
+  
+  <Card title="Manager Assignment" icon="user-tie">
+    Assign a user as location manager with visibility to location assets.
+  </Card>
+  
+  <Card title="Asset Assignment" icon="laptop">
+    Assets can be checked out to locations or use location as RTD.
+  </Card>
+  
+  <Card title="Multi-Company" icon="building">
+    Separate locations by company in multi-tenant deployments.
+  </Card>
+</CardGroup>
+
+## Creating Locations
+
+<Steps>
+  <Step title="Basic Information">
+    - Location name (required, unique)
+    - Parent location (optional)
+    - Company assignment (for multi-company)
+    - Manager (user who manages this location)
+  </Step>
+  
+  <Step title="Address Details">
+    - Address line 1
+    - Address line 2
+    - City
+    - State/Province (2+ characters)
+    - Country (2+ characters)
+    - ZIP/Postal code
+  </Step>
+  
+  <Step title="Contact Information">
+    - Phone number
+    - Fax number
+  </Step>
+  
+  <Step title="Integration Settings">
+    - LDAP OU (for LDAP user sync)
+    - Currency (for this location)
+    - Asset tag color
+    - Location image
+    - Internal notes
+  </Step>
+</Steps>
+
+## Hierarchical Structure
+
+### Parent-Child Relationships
+
+Build location trees:
+
+```
+United States (parent)
+├── West Region
+│   ├── San Francisco Office
+│   │   ├── Floor 1
+│   │   ├── Floor 2
+│   │   └── Floor 3
+│   └── Los Angeles Office
+└── East Region
+    ├── New York Office
+    └── Boston Office
+```
+
+### Benefits of Hierarchy
+
+- Organize by geography
+- Report at different levels
+- Simplify bulk operations
+- Logical grouping
+- Easier navigation
+
+<Note>
+The system prevents circular references - a location cannot be its own parent or ancestor.
+</Note>
+
+### Viewing Children
+
+Each location shows:
+- Direct child locations
+- Recursive children (grandchildren, etc.)
+- Count of locations at each level
+
+## Location Managers
+
+Assign users to manage locations:
+
+### Manager Responsibilities
+
+- View assets at their location
+- Manage user assignments
+- Approve asset requests for their location
+- Location-specific reporting
+- Asset audits and checks
+
+### Manager Assignment
+
+<Steps>
+  <Step title="Select Manager">
+    Choose a user from your organization
+  </Step>
+  
+  <Step title="Set on Location">
+    Assign them as the location manager
+  </Step>
+  
+  <Step title="Manager Access">
+    They can now view and manage location assets
+  </Step>
+</Steps>
+
+<Tip>
+Managers see assets assigned to their location and all child locations.
+</Tip>
+
+## Asset Relationships
+
+### RTD Location (Ready to Deploy)
+
+Every asset should have an RTD location:
+- Where the asset "belongs"
+- Where it returns when checked in
+- Default location for unassigned assets
+
+### Current Location
+
+Where the asset is now:
+- Inherits from assigned user's location
+- Explicitly set during checkout
+- Can differ from RTD location
+
+### Checked Out to Location
+
+Assets can be assigned directly to a location:
+- Not assigned to a specific person
+- Available at that location
+- For shared equipment or pools
+
+## User Assignment
+
+Users have default locations:
+- User's primary work location
+- Assets inherit this on checkout
+- Used for location-based reporting
+- Helps with shipping/logistics
+
+## Inventory at Location
+
+Each location tracks:
+
+<AccordionGroup>
+  <Accordion title="Assets">
+    - Assets with this RTD location
+    - Assets currently assigned here
+    - Assets checked out to users at this location
+  </Accordion>
+  
+  <Accordion title="Users">
+    - Users assigned to this location
+    - Count and list view
+    - User details and contact info
+  </Accordion>
+  
+  <Accordion title="Accessories">
+    - Accessories stored at this location
+    - Available quantity here
+    - Checked out from this location
+  </Accordion>
+  
+  <Accordion title="Consumables">
+    - Consumable inventory at location
+    - Quantities on hand
+    - Distributed from here
+  </Accordion>
+  
+  <Accordion title="Components">
+    - Component stock at location
+    - Available for installation
+    - Location-based inventory
+  </Accordion>
+</AccordionGroup>
+
+## Location-Based Reporting
+
+### Asset Reports by Location
+
+- All assets at a location
+- Assets by status at location
+- Value of inventory per location
+- Utilization rates
+- Asset distribution analysis
+
+### User Reports by Location
+
+- Employee headcount per location
+- Assets per user per location
+- Location-based asset requests
+
+### Inventory Reports
+
+- Stock levels per location
+- Low stock alerts by location
+- Location-based purchasing
+- Transfer tracking
+
+## Multi-Company Support
+
+Assign locations to companies:
+
+- Enforce company boundaries
+- Company-specific locations
+- Prevent cross-company assignments
+- Independent location trees per company
+- Shared or exclusive locations
+
+<Note>
+When multi-company is enabled, users only see locations for their company (unless they're superusers).
+</Note>
+
+## Address Information
+
+Complete address tracking:
+
+- Used for shipping labels
+- Asset location verification
+- Physical audits
+- Maps integration (potential)
+- Contact information
+
+### Address Format
+
+```
+Snipe-IT Headquarters
+123 Example Street
+Suite 456
+San Francisco, CA 94102
+United States
+Phone: +1-555-0100
+```
+
+## LDAP Integration
+
+### LDAP OU Mapping
+
+Map locations to LDAP OUs:
+- Sync users to locations based on OU
+- Automatic location assignment
+- Keep LDAP and Snipe-IT in sync
+- Organizational unit matching
+
+## Currency Settings
+
+Set location-specific currency:
+- Override global currency
+- Multi-currency support
+- Location-based pricing
+- Financial reporting
+
+## Asset Tag Colors
+
+Customize tag colors per location:
+- Color-coded asset tags
+- Visual location identification
+- Label printing
+- Quick recognition
+
+## Location Images
+
+Add visual identification:
+- Upload building/office photos
+- Floor plans
+- Maps
+- Visual reference for users
+
+## Deletion Protection
+
+Locations can only be deleted if:
+
+<Warning>
+A location cannot be deleted if it has:
+- Assets (current or RTD)
+- Users assigned
+- Accessories stored there
+- Consumables in inventory
+- Components in stock
+- Child locations
+- Assets assigned as a location
+</Warning>
+
+The `isDeletable()` method checks all relationships.
+
+## Search and Filtering
+
+Locations are searchable by:
+- Name
+- Address fields
+- City, state, ZIP
+- Phone/fax numbers
+- Parent location name
+- Company name
+- LDAP OU
+- Notes
+
+## Sorting Options
+
+Sort locations by:
+- Name (alphabetically)
+- Parent location
+- Manager name
+- Company
+- Number of assets
+- Number of users
+- Created date
+- Created by user
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Naming Convention">
+    Use consistent naming: "Country - City - Building" format helps with sorting and clarity.
+  </Accordion>
+  
+  <Accordion title="Hierarchy Planning">
+    Plan your hierarchy before creating locations. Consider: Country → Region → Office → Floor → Department.
+  </Accordion>
+  
+  <Accordion title="Manager Assignment">
+    Assign managers to locations where you have on-site staff responsible for assets.
+  </Accordion>
+  
+  <Accordion title="Complete Addresses">
+    Enter full addresses for all physical locations to support shipping and audits.
+  </Accordion>
+  
+  <Accordion title="RTD Consistency">
+    Always set RTD locations on assets so they return to the correct place when checked in.
+  </Accordion>
+  
+  <Accordion title="Parent Relationships">
+    Use parent relationships to build logical hierarchies, not just geographic ones.
+  </Accordion>
+</AccordionGroup>
+
+## Common Workflows
+
+### New Office Setup
+
+1. Create parent location (e.g., "Seattle Office")
+2. Add address and contact details
+3. Assign office manager
+4. Create child locations (floors, departments)
+5. Set currency if different from HQ
+6. Upload office photo
+7. Begin assigning assets and users
+
+### Asset Transfer Between Locations
+
+1. Check in asset from current user
+2. Asset returns to RTD location
+3. Change RTD location to new location
+4. Optionally check out to user at new location
+5. Update location manager if needed
+
+### Office Closure
+
+1. Generate report of all location assets
+2. Transfer assets to other locations
+3. Reassign users to new locations
+4. Move inventory (accessories, consumables)
+5. Remove child locations
+6. Archive or delete location
+
+## API Support
+
+Locations are fully accessible via API:
+- List all locations
+- Get location details
+- Create new locations
+- Update location info
+- Delete locations (if eligible)
+- Get assets at location
+- Get users at location
+
+## Audit Trail
+
+Location activity tracking:
+- Creation date and creator
+- Modification history
+- Manager changes
+- Asset movements
+- User assignments
+
+## Related Features
+
+- [Assets](/features/assets) - Assign assets to locations
+- [Users](/features/users) - Assign users to locations
+- [Accessories](/features/accessories) - Store accessories at locations
+- [Consumables](/features/consumables) - Track consumable inventory per location
+- [Components](/features/components) - Component storage locations

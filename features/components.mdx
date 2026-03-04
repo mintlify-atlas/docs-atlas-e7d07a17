@@ -1,0 +1,417 @@
+---
+title: Components
+description: Track parts and components installed in assets - RAM, hard drives, and other upgrades or replacements
+icon: microchip
+---
+
+## Overview
+
+Components are parts that are installed into assets. Unlike accessories (which are checked out to users) or consumables (which are used up), components become a permanent part of another asset until removed.
+
+## What Are Components?
+
+Common examples:
+- **RAM modules** - Installed in laptops or servers
+- **Hard drives / SSDs** - Storage upgrades
+- **Network cards** - Ethernet or WiFi adapters
+- **Video cards** - GPU upgrades
+- **Power supplies** - Replacement PSUs
+- **Processors** - CPU upgrades
+- **Batteries** - Replacement batteries
+
+<Note>
+Components are tracked by quantity but assigned to specific assets with a quantity per assignment.
+</Note>
+
+## Key Characteristics
+
+<CardGroup cols={2}>
+  <Card title="Asset-Installed" icon="screwdriver-wrench">
+    Components are checked out to assets, not users or locations.
+  </Card>
+  
+  <Card title="Quantity Tracking" icon="calculator">
+    Track total quantity and how many are assigned to each asset.
+  </Card>
+  
+  <Card title="Asset History" icon="timeline">
+    Full history of where components were installed.
+  </Card>
+  
+  <Card title="Cost Tracking" icon="dollar-sign">
+    Component costs add to total asset value.
+  </Card>
+</CardGroup>
+
+## Creating Components
+
+<Steps>
+  <Step title="Basic Information">
+    - Component name (e.g., "16GB DDR4-3200 RAM")
+    - Category (components category)
+    - Total quantity on hand
+    - Model number (optional)
+    - Serial number (optional, for specific tracking)
+  </Step>
+  
+  <Step title="Purchase Details">
+    - Supplier
+    - Purchase cost per unit
+    - Purchase date
+    - Order number
+  </Step>
+  
+  <Step title="Inventory Settings">
+    - Minimum quantity alert threshold
+    - Default storage location
+    - Manufacturer
+    - Company assignment
+  </Step>
+  
+  <Step title="Additional Info">
+    - Upload component image
+    - Add technical specifications
+    - Internal notes
+  </Step>
+</Steps>
+
+## Checkout Process
+
+### Assigning Components to Assets
+
+<Steps>
+  <Step title="Navigate to Component">
+    Find the component you want to install
+  </Step>
+  
+  <Step title="Click Check Out">
+    Select "Check Out" from component details
+  </Step>
+  
+  <Step title="Select Asset">
+    Choose which asset to install component into
+  </Step>
+  
+  <Step title="Specify Quantity">
+    Enter how many units to install (defaults to 1)
+  </Step>
+  
+  <Step title="Add Notes">
+    Optional installation notes (e.g., "Upgraded from 8GB")
+  </Step>
+  
+  <Step title="Confirm">
+    System records:
+    - Which asset received the component
+    - Quantity assigned
+    - Date of installation
+    - Who performed the installation
+  </Step>
+</Steps>
+
+<Warning>
+You can only check out components to assets - not to users, locations, or other entity types.
+</Warning>
+
+## Check-In Process
+
+### Removing Components from Assets
+
+When a component is removed:
+
+1. Find the asset with the component
+2. View installed components
+3. Click "Check In" on the component
+4. Quantity returns to available pool
+5. History preserved in audit log
+
+<Tip>
+Partial check-ins are supported - you can remove some but not all units if multiple were installed.
+</Tip>
+
+## Quantity Management
+
+### Available vs. Assigned
+
+```
+Total Quantity = 50 units
+Assigned to assets = 35 units
+Available = 15 units
+```
+
+### Viewing Assignments
+
+See which assets have which components:
+- Asset name and tag
+- Quantity installed
+- Installation date
+- Who installed it
+- Installation notes
+
+### Minimum Quantity Alerts
+
+Set thresholds to trigger alerts:
+- Get notified when stock is low
+- Plan component purchases
+- Prevent upgrade delays
+- Email notifications
+
+## Asset Value Impact
+
+Components add to asset value:
+
+```
+Asset Purchase Cost: $1,200
++ 32GB RAM (2×16GB): $120
++ 1TB SSD Upgrade: $150
+= Total Asset Value: $1,470
+```
+
+<Note>
+The `getComponentCost()` method calculates total component value per asset.
+</Note>
+
+## Component Categories
+
+Organize by component type:
+
+<AccordionGroup>
+  <Accordion title="Memory">
+    - DDR3/DDR4/DDR5 RAM
+    - SODIMM vs. DIMM
+    - Different capacities
+    - ECC vs. non-ECC
+  </Accordion>
+  
+  <Accordion title="Storage">
+    - Hard drives
+    - SSDs (SATA, NVMe, M.2)
+    - Storage controllers
+    - RAID cards
+  </Accordion>
+  
+  <Accordion title="Network">
+    - Ethernet cards
+    - WiFi adapters
+    - Bluetooth modules
+    - Fiber cards
+  </Accordion>
+  
+  <Accordion title="Power">
+    - Power supplies
+    - UPS batteries
+    - Power cables
+    - Battery packs
+  </Accordion>
+  
+  <Accordion title="Graphics">
+    - Video cards
+    - Graphics processors
+    - Display adapters
+  </Accordion>
+</AccordionGroup>
+
+## Custom Fields
+
+Track component-specific data:
+
+- **Specifications** - Speed, capacity, voltage
+- **Compatibility** - Which models it works with
+- **Warranty** - Component-specific warranty
+- **Part Numbers** - OEM and aftermarket
+- **Technical Details** - Form factor, interface
+
+## Reporting
+
+### Inventory Reports
+
+<CardGroup cols={2}>
+  <Card title="Stock Levels" icon="boxes-stacked">
+    Current quantity, assigned, and available for each component type.
+  </Card>
+  
+  <Card title="Low Stock" icon="triangle-exclamation">
+    Components below minimum quantity needing reorder.
+  </Card>
+  
+  <Card title="Asset Components" icon="list">
+    What components are installed in each asset.
+  </Card>
+  
+  <Card title="Component Value" icon="chart-line">
+    Total inventory value and cost per asset.
+  </Card>
+</CardGroup>
+
+### Usage Analysis
+
+- Component checkout history
+- Most frequently installed components
+- Upgrade trends over time
+- Cost analysis for upgrades
+- Supplier performance
+
+## Multi-Company Support
+
+For organizations with multiple companies:
+
+- Assign components to companies
+- Company-scoped inventory
+- Prevent cross-company assignments
+- Independent reporting per company
+- Shared or dedicated component pools
+
+<Note>
+The `CompanyableScope` ensures components are only visible and assignable within their company context.
+</Note>
+
+## Location Tracking
+
+Manage component storage:
+
+- Default storage location
+- Track where unassigned components are kept
+- Multi-location inventory
+- Easier physical audits
+- Location-based access
+
+## Acceptance Requirements
+
+Components can require acceptance:
+
+- Set at category level
+- User (of assigned asset) must accept
+- Email notification sent
+- Track acceptance status
+- Declined components returned
+
+## Cost Tracking
+
+### Per-Component Cost
+
+```
+Unit Cost: $75
+Quantity: 20
+Total Value: $1,500
+```
+
+### Total Asset Cost
+
+Assets can calculate total component cost:
+
+```php
+$asset->getComponentCost()
+// Returns sum of all installed component costs
+```
+
+### Financial Reporting
+
+- Track component spend
+- Upgrade costs per asset
+- Budget for replacements
+- Supplier cost comparison
+
+## Checkout Notes
+
+Document installations:
+
+- Why component was installed
+- What it replaced
+- Configuration changes
+- Performance improvements
+- Issues encountered
+
+<Tip>
+Use checkout notes to create an upgrade history for each asset.
+</Tip>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Descriptive Naming">
+    Include specifications in the name: "Crucial 16GB DDR4-3200 SODIMM" instead of just "RAM".
+  </Accordion>
+  
+  <Accordion title="Compatibility Tracking">
+    Use custom fields or notes to document which asset models components work with.
+  </Accordion>
+  
+  <Accordion title="Serial Numbers">
+    For high-value components, include serial numbers for warranty tracking.
+  </Accordion>
+  
+  <Accordion title="Installation Notes">
+    Always document what was replaced and any configuration changes made.
+  </Accordion>
+  
+  <Accordion title="Regular Audits">
+    Verify component inventory matches physical stock, especially before ordering.
+  </Accordion>
+  
+  <Accordion title="Minimum Quantities">
+    Set minimums based on:
+    - Common failure rates
+    - Supplier lead times  
+    - Standard upgrade quantities
+    - Emergency replacement needs
+  </Accordion>
+</AccordionGroup>
+
+## Common Workflows
+
+### RAM Upgrade
+
+1. User requests more memory
+2. Check available RAM components
+3. Check out 2× 16GB to user's laptop
+4. Note: "Upgraded from 2×8GB to 2×16GB"
+5. Old RAM returned to stock (if kept)
+6. Asset value automatically updated
+
+### Hard Drive Replacement
+
+1. Hard drive fails in server
+2. Check out replacement drive to asset
+3. Document: "Replaced failed drive in RAID array"
+4. Failed drive marked as disposed
+5. Component history shows all drive changes
+
+### New Build
+
+1. Create new asset (computer)
+2. Check out components:
+   - Motherboard
+   - CPU
+   - RAM (multiple units)
+   - Storage drives
+   - Power supply
+3. Total component cost added to asset value
+4. Complete build documentation in notes
+
+## Limitations & Considerations
+
+<Warning>
+Components use a caching mechanism for checkout counts. When modifying component quantities programmatically, use `numCheckedOut(true)` to recalculate.
+</Warning>
+
+### Cannot Do
+
+- Check out to users or locations
+- Track individual serial numbers per unit (without custom fields)
+- Depreciate separately from assets
+- Have maintenance records
+
+### Can Do
+
+- Track which assets have which components
+- Maintain complete installation history
+- Calculate total component cost per asset
+- Alert on low stock
+- Support multi-company deployments
+
+## Related Features
+
+- [Assets](/features/assets) - Install components into assets
+- [Accessories](/features/accessories) - For external peripherals
+- [Consumables](/features/consumables) - For items that aren't returned
+- [Maintenance](/features/maintenance) - Track when components are replaced

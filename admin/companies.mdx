@@ -1,0 +1,447 @@
+---
+title: Companies
+description: Configure multi-tenant company support to separate assets and users by organization
+---
+
+The Companies feature in Snipe-IT enables multi-tenant asset tracking, allowing you to manage assets for multiple organizations or business units within a single Snipe-IT instance.
+
+## Overview
+
+Snipe-IT offers two modes of company support:
+
+1. **Basic Company Support** (Default) - Companies are used for organizational purposes, but all users can see all assets
+2. **Full Multiple Company Support (FMCS)** - Strict separation where users can only see assets belonging to their company
+
+<Info>
+  Companies in Snipe-IT can represent different entities based on your needs:
+  - Separate legal entities in a corporate group
+  - Departments or divisions within an organization
+  - Client organizations in an MSP environment
+  - Geographic regions or branches
+</Info>
+
+## Enabling Full Multiple Company Support
+
+To enable strict company separation:
+
+1. Navigate to **Settings** > **General Settings**
+2. Under **Security**, enable **Full Multiple Companies Support**
+3. Save settings
+
+<Warning>
+  Enabling FMCS changes access control throughout the application. Test thoroughly in a non-production environment before enabling in production.
+</Warning>
+
+### How FMCS Affects Access
+
+When FMCS is enabled (from `app/Models/Company.php:79-89`):
+
+```php
+private static function isFullMultipleCompanySupportEnabled()
+{
+    $settings = Setting::getSettings();
+    if (is_null($settings)) {
+        return false;
+    } else {
+        return $settings->full_multiple_companies_support == 1;
+    }
+}
+```
+
+**With FMCS Enabled:**
+- Users can only view/manage items belonging to their company
+- Super users can view/manage all companies
+- Users with no company assigned can view/manage all items
+- Company assignment is enforced automatically on all queries
+
+**Without FMCS:**
+- All users can see all assets regardless of company
+- Companies are for organizational/reporting purposes only
+
+## Creating Companies
+
+### Step 1: Navigate to Companies
+
+Go to **Settings** (gear icon) > **Companies** in the admin interface.
+
+### Step 2: Create New Company
+
+Click **Create New** and configure:
+
+<ParamField path="Name" type="string" required>
+  Company name (e.g., "Acme Corporation", "Sales Department", "West Coast Region").
+  
+  Must be unique across all companies.
+</ParamField>
+
+<ParamField path="Phone" type="string">
+  Company phone number (7-35 characters).
+</ParamField>
+
+<ParamField path="Fax" type="string">
+  Company fax number (7-35 characters).
+</ParamField>
+
+<ParamField path="Email" type="string">
+  Company email address (must be valid email format).
+</ParamField>
+
+<ParamField path="Notes" type="textarea">
+  Internal notes about the company.
+</ParamField>
+
+<ParamField path="Tag Color" type="color">
+  Optional color for visual identification in the interface.
+</ParamField>
+
+Validation rules are defined in `app/Models/Company.php:29-34`:
+
+```php
+protected $rules = [
+    'name' => 'required|max:255|unique:companies,name',
+    'fax' => 'min:7|max:35|nullable',
+    'phone' => 'min:7|max:35|nullable',
+    'email' => 'email|max:150|nullable',
+];
+```
+
+## Assigning Items to Companies
+
+All major item types support company assignment:
+
+- Assets
+- Accessories
+- Consumables
+- Components
+- Licenses
+- Users
+
+### Assigning During Creation
+
+When creating a new item, select the company from the **Company** dropdown.
+
+<Info>
+  If FMCS is enabled and you're not a super user, the company field will be automatically set to your company and hidden from the form.
+</Info>
+
+### Bulk Company Assignment
+
+You can bulk-update company assignments:
+
+1. Go to the asset/accessory/etc. listing page
+2. Select multiple items using checkboxes
+3. Choose **Actions** > **Change Company**
+4. Select the new company
+5. Confirm the change
+
+## Company-Based Access Control
+
+Access control is handled in `app/Models/Company.php:138-181`:
+
+```php
+public static function isCurrentUserHasAccess($companyable)
+{
+    // If FMCS is not enabled, everyone has access
+    if (! static::isFullMultipleCompanySupportEnabled()) {
+        return true;
+    }
+    
+    if (auth()->user()) {
+        $current_user_company_id = auth()->user()->company_id;
+        $companyable_company_id = $companyable->company_id;
+        
+        // Access granted if:
+        // - User has no company (can see all)
+        // - Company IDs match
+        // - User is a super user
+        return ($current_user_company_id == null) || 
+               ($current_user_company_id == $companyable_company_id) || 
+               auth()->user()->isSuperUser();
+    }
+    
+    return false;
+}
+```
+
+### User Roles in FMCS
+
+<Tabs>
+  <Tab title="Super User">
+    **Full Access**
+    - Can view and manage all companies
+    - Can assign any company to items and users
+    - Can create users in any company
+    
+    Super users bypass all company restrictions.
+  </Tab>
+  
+  <Tab title="Company Admin">
+    **Company-Scoped Access**
+    - Can only view/manage items in their company
+    - Can create users only in their company
+    - Cannot change company assignments
+    
+    Regular admins are restricted to their company when FMCS is enabled.
+  </Tab>
+  
+  <Tab title="User (No Company)">
+    **Global Access**
+    - Can view/manage all items across all companies
+    - Not restricted by company boundaries
+    
+    Users without a company assignment have global access (useful for service accounts).
+  </Tab>
+  
+  <Tab title="Company User">
+    **Company-Only Access**
+    - Can only view items assigned to their company
+    - Can only see users in their company
+    - Cannot access items from other companies
+  </Tab>
+</Tabs>
+
+## Company Scoping in Queries
+
+Snipe-IT automatically scopes database queries based on company when FMCS is enabled (`app/Models/Company.php:276-284`):
+
+```php
+public static function scopeCompanyables($query, $column = 'company_id', $table_name = null)
+{
+    // If not logged in, FMCS disabled, or super user - no scoping
+    if (! static::isFullMultipleCompanySupportEnabled() || 
+        (Auth::hasUser() && auth()->user()->isSuperUser()) || 
+        (! Auth::hasUser())) {
+        return $query;
+    } else {
+        return static::scopeCompanyablesDirectly($query, $column, $table_name);
+    }
+}
+```
+
+This scoping is applied automatically through the `CompanyableTrait` used by assets, accessories, consumables, components, and licenses.
+
+## Deleting Companies
+
+A company can only be deleted if it's empty (`app/Models/Company.php:201-212`):
+
+```php
+public function isDeletable()
+{
+    return Gate::allows('delete', $this)
+        && (($this->assets_count ?? $this->assets()->count()) === 0)
+        && (($this->accessories_count ?? $this->accessories()->count()) === 0)
+        && (($this->licenses_count ?? $this->licenses()->count()) === 0)
+        && (($this->components_count ?? $this->components()->count()) === 0)
+        && (($this->consumables_count ?? $this->consumables()->count()) === 0)
+        && (($this->users_count ?? $this->users()->count()) === 0);
+}
+```
+
+<Warning>
+  Before deleting a company:
+  1. Reassign or delete all assets
+  2. Reassign or delete all accessories, consumables, components, and licenses
+  3. Reassign or delete all users
+  4. Then delete the company
+  
+  Companies with any associated items cannot be deleted.
+</Warning>
+
+## Permissions
+
+Company management requires specific permissions (`config/permissions.php:430-447`):
+
+- `companies.view` - View companies
+- `companies.create` - Create new companies
+- `companies.edit` - Edit existing companies
+- `companies.delete` - Delete companies
+
+## API Access
+
+Companies are fully accessible via the REST API:
+
+### List All Companies
+
+```bash
+GET /api/v1/companies
+```
+
+Response includes company details and item counts:
+
+```json
+{
+  "total": 3,
+  "rows": [
+    {
+      "id": 1,
+      "name": "Acme Corporation",
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-01-15T10:30:00Z",
+      "assets_count": 150,
+      "licenses_count": 45,
+      "accessories_count": 80,
+      "consumables_count": 200,
+      "components_count": 30,
+      "users_count": 25
+    }
+  ]
+}
+```
+
+### Get Specific Company
+
+```bash
+GET /api/v1/companies/{id}
+```
+
+### Create Company
+
+```bash
+POST /api/v1/companies
+```
+
+```json
+{
+  "name": "New Division",
+  "email": "contact@newdivision.com",
+  "phone": "555-0123"
+}
+```
+
+### Update Company
+
+```bash
+PATCH /api/v1/companies/{id}
+```
+
+### Delete Company
+
+```bash
+DELETE /api/v1/companies/{id}
+```
+
+## Reporting with Companies
+
+Companies are a key dimension in Snipe-IT reporting:
+
+- **Assets by Company** - View asset distribution across companies
+- **Company Asset Valuation** - Track total asset value per company
+- **License Compliance by Company** - Ensure license compliance per company
+- **User Activity by Company** - Monitor checkout/checkin activity
+
+When FMCS is enabled, users only see reports for their company (unless they're super users).
+
+## Use Case Examples
+
+### Multi-Client MSP
+
+Managed Service Providers can use companies to separate client assets:
+
+- **Company 1:** Client A - Law Firm
+- **Company 2:** Client B - Dental Practice  
+- **Company 3:** Client C - Accounting Firm
+
+Enable FMCS to ensure complete separation. Create technician accounts without company assignment for cross-client access.
+
+### Corporate Departments
+
+Large organizations can use companies for departments:
+
+- **Company 1:** Sales
+- **Company 2:** Marketing
+- **Company 3:** Engineering
+- **Company 4:** HR
+
+Keep FMCS disabled to allow IT admins to view all assets while maintaining organizational reporting.
+
+### Regional Offices
+
+Multi-location organizations can use companies for regions:
+
+- **Company 1:** North America
+- **Company 2:** Europe
+- **Company 3:** Asia-Pacific
+
+Enable FMCS to restrict regional IT teams to their region's assets.
+
+## Advanced Configuration
+
+### Default Company Assignment
+
+When creating new items, the company is determined by (`app/Models/Company.php:111-129`):
+
+```php
+public static function getIdForCurrentUser($unescaped_input)
+{
+    if (! static::isFullMultipleCompanySupportEnabled()) {
+        return static::getIdFromInput($unescaped_input);
+    } else {
+        $current_user = auth()->user();
+        
+        // Super users can set any company
+        if ($current_user->isSuperUser()) {
+            return static::getIdFromInput($unescaped_input);
+        } else {
+            // Non-super users get their company automatically
+            if ($current_user->company_id != null) {
+                return $current_user->company_id;
+            } else {
+                return null;
+            }
+        }
+    }
+}
+```
+
+### Company Scoping for Child Relationships
+
+For complex queries involving related models, company scoping is applied recursively (`app/Models/Company.php:337-361`).
+
+## Troubleshooting
+
+### Users Cannot See Assets After Enabling FMCS
+
+This is expected behavior. Assign users to companies:
+
+1. Go to **People** > **Users**
+2. Edit each user
+3. Assign them to the appropriate company
+4. Save
+
+### "Cannot Manage Users' Companies" Error
+
+Non-super users cannot create users in different companies when FMCS is enabled. This is enforced by (`app/Models/Company.php:188-192`):
+
+```php
+public static function canManageUsersCompanies()
+{
+    return ! static::isFullMultipleCompanySupportEnabled() || 
+           auth()->user()->isSuperUser() ||
+           auth()->user()->company_id == null;
+}
+```
+
+Solution: Have a super user create users, or assign company admins a null company.
+
+### API Returns Empty Results
+
+API access respects company scoping. When using API tokens:
+- Generate tokens from a super user account for cross-company access
+- Or generate separate tokens per company
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="User Management" icon="users" href="/features/users">
+    Assign users to companies
+  </Card>
+  <Card title="Permissions" icon="shield-halved" href="/admin/security">
+    Configure company-based access control
+  </Card>
+  <Card title="Reports" icon="chart-bar" href="/features/assets">
+    Generate company-specific reports
+  </Card>
+  <Card title="API Documentation" icon="code" href="/integration/api-overview">
+    Access companies via the REST API
+  </Card>
+</CardGroup>
